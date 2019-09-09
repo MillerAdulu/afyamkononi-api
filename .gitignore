@@ -1,0 +1,8 @@
+*.pyc
+.env
+*__pycache__
+venv
+.env.*
+.vscode
+.pytest_cache
+!.env.testing
