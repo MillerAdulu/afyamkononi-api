@@ -10,7 +10,9 @@ class CreateUsersTable(Migration):
             table.string('name')
             table.string('email').unique()
             table.string('password')
-            table.string('remember_token').nullable()
+            table.string('private_key')
+            table.string('public_key')
+            table.string('type')
             table.timestamp('verified_at').nullable()
             table.timestamps()
 
