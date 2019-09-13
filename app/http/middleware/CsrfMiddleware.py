@@ -8,7 +8,7 @@ class CsrfMiddleware(Middleware):
 
     """Which routes should be exempt from CSRF protection."""
     exempt = [
-        #
+        '/api/*'
     ]
 
     """Whether or not the CSRF token should be changed on every request."""
