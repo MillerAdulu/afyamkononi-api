@@ -35,9 +35,17 @@ class RegisterController(Controller):
         user.private_key = priv_key
         user.public_key = pub_key
 
-        block_status = ibc.create_account(user)
-        if 'REJECTED' in block_status[2]:
-            return {'error': 'REJECTED'}
+        block_stati = ibc.create_account(user)
+
+        if 'STATEFUL_VALIDATION_FAILED' in block_stati[1]:
+            if block_stati[1][2] == 1:
+                return {'error': 'Could not create account'}
+            if block_stati[1][2] == 2:
+                return {'error': 'No such permissions'}
+            if block_stati[1][2] == 3:
+                return {'error': 'No such domain'}
+            if block_stati[1][2] == 4:
+                return {'error': 'Account already exists'}
 
         user.save()
         return user.to_json()

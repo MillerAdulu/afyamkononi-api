@@ -11,22 +11,14 @@ import os
 IROHA_HOST_ADDR = os.getenv('IROHA_HOST_ADDR', '127.0.0.1')
 IROHA_PORT = '50051'
 ADMIN_ACCOUNT_ID = 'admin@test'
-ADMIN_PRIVATE_KEY = 'f101537e319568c765b2cc89698325604991dca57b9716b58016b253506cab70'
+ADMIN_PRIVATE_KEY = os.getenv('ADMIN_PRIVATE_KEY',
+                              'f101537e319568c765b2cc89698325604991dca57b9716b58016b253506cab70')
 
 user_private_key = IrohaCrypto.private_key()
 user_public_key = IrohaCrypto.derive_public_key(user_private_key)
 
 iroha = Iroha(ADMIN_ACCOUNT_ID)
 net = IrohaGrpc('{}:{}'.format(IROHA_HOST_ADDR, IROHA_PORT))
-
-
-def run():
-    create_domain()
-    # create_account()
-    # kmpdu_grants_to_admin_set_account_detail_permisson()
-    # set_name_to_kmpdu()
-    # get_kmpdu_details()
-    print('Done')
 
 
 def send_transaction_and_return_status(transaction):
