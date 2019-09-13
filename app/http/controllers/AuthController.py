@@ -1,4 +1,4 @@
-"""A RegisterController Module."""
+"""An AuthController Module."""
 
 from masonite.request import Request
 from masonite.view import View
@@ -11,18 +11,18 @@ import app.http.controllers.IrohaBlockchain as ibc
 import json
 
 
-class RegisterController(Controller):
-    """RegisterController Controller Class."""
+class AuthController(Controller):
+    """AuthController Controller Class."""
 
     def __init__(self, request: Request):
-        """RegisterController Initializer
+        """AuthController Initializer
 
         Arguments:
             request {masonite.request.Request} -- The Masonite Request class.
         """
         self.request = request
 
-    def store(self, request: Request):
+    def register(self, request: Request):
         priv_key = IrohaCrypto.private_key()
         pub_key = IrohaCrypto.derive_public_key(priv_key)
 
@@ -71,7 +71,7 @@ class RegisterController(Controller):
         user.save()
         return user.to_json()
 
-    def show(self, request: Request):
+    def view_user(self, request: Request):
         user = User.find(request.param('user'))
 
         data = ibc.get_account_details(user)
