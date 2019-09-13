@@ -7,6 +7,7 @@ ROUTES = [
 
     RouteGroup([
         RouteGroup([
+            Get('/@user', 'RegisterController@show'),
             Post('/', 'RegisterController@store'),
         ], prefix="/accounts")
     ], prefix="/api")

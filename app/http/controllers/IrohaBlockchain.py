@@ -36,22 +36,6 @@ def send_transaction_and_return_status(transaction):
     return stati
 
 
-def create_domain():
-    """
-    Creates domain 'domain'
-    """
-
-    command = [
-        iroha.command('CreateDomain', domain_id='afyamkononi',
-                      default_role='user')
-        ]
-
-    tx = IrohaCrypto.sign_transaction(iroha.transaction(command),
-                                      ADMIN_PRIVATE_KEY)
-
-    send_transaction_and_return_status(tx)
-
-
 def create_account(user):
     """
     Creates a user account
@@ -66,42 +50,43 @@ def create_account(user):
     return send_transaction_and_return_status(tx)
 
 
-def kmpdu_grants_to_admin_set_account_detail_permisson():
+def set_account_details(user):
     """
-    Make admin@test able to set detail to kmpdu
+    Set account details
+    """
+    tx = iroha.transaction([
+        iroha.command('SetAccountDetail',
+                      account_id=f'{user.name}@afyamkononi', key='email',
+                      value=f'{user.email}'),
+        iroha.command('SetAccountDetail',
+                      account_id=f'{user.name}@afyamkononi', key='name',
+                      value=f'{user.name}'),
+    ])
+
+    IrohaCrypto.sign_transaction(tx, ADMIN_PRIVATE_KEY)
+    return send_transaction_and_return_status(tx)
+
+
+def get_account_details(user):
+    """
+    Get all the kv-storage entries for a user
+    """
+
+    query = iroha.query('GetAccountDetail',
+                        account_id=f'{user.name}@afyamkononi')
+    IrohaCrypto.sign_query(query, ADMIN_PRIVATE_KEY)
+
+    response = net.send_query(query)
+    return response.account_detail_response
+
+
+def grant_admin_set_account_detail_perms(account_name, priv_key):
+    """
+    Make admin@test able to set detail to account
     """
     tx = iroha.transaction([
         iroha.command('GrantPermission', account_id='admin@test',
                       permission=can_set_my_account_detail)
-    ], creator_account='kmpdu@afyamkononi')
-    IrohaCrypto.sign_transaction(tx, user_private_key)
-    send_transaction_and_return_status(tx)
-
-
-def set_name_to_kmpdu():
-    """
-    Set name to kmpdu@afyamkononi.com by admin@test
-    """
-    tx = iroha.transaction([
-        iroha.command('SetAccountDetail', account_id='kmpdu@afyamkononi',
-                      key='name', value='wozzap'),
-        iroha.command('SetAccountDetail', account_id='kmpdu@afyamkononi',
-                      key='zamzing', value='zamzam')
-    ])
-
-    IrohaCrypto.sign_transaction(tx, ADMIN_PRIVATE_KEY)
-    send_transaction_and_return_status(tx)
-
-
-def get_kmpdu_details():
-    """
-    Get all the kv-storage entries for kmpdu@afyamkononi
-    """
-
-    query = iroha.query('GetAccountDetail', account_id='kmpdu@afyamkononi')
-    IrohaCrypto.sign_query(query, ADMIN_PRIVATE_KEY)
-
-    response = net.send_query(query)
-    data = response.account_detail_response
-    print('Account id = {}, details = {}'.format('kmpdu@afyamkononi',
-                                                 data.detail))
+    ], creator_account=f'{account_name}@afyamkononi')
+    IrohaCrypto.sign_transaction(tx, priv_key)
+    return send_transaction_and_return_status(tx)

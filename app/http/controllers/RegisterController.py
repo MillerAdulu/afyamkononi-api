@@ -47,5 +47,33 @@ class RegisterController(Controller):
             if block_stati[1][2] == 4:
                 return {'error': 'Account already exists'}
 
+        block_stati = ibc.grant_admin_set_account_detail_perms(user.name,
+                                                               priv_key)
+
+        if 'STATEFUL_VALIDATION_FAILED' in block_stati[1]:
+            if block_stati[1][2] == 1:
+                return {'error': 'Could not grant permission'}
+            if block_stati[1][2] == 2:
+                return {'error': 'No such permissions'}
+            if block_stati[1][2] == 3:
+                return {'error': 'No such account'}
+
+        block_stati = ibc.set_account_details(user)
+
+        if 'STATEFUL_VALIDATION_FAILED' in block_stati[1]:
+            if block_stati[1][2] == 1:
+                return {'error': 'Could not set account detail'}
+            if block_stati[1][2] == 2:
+                return {'error': 'No such permissions'}
+            if block_stati[1][2] == 3:
+                return {'error': 'No such account'}
+
         user.save()
         return user.to_json()
+
+    def show(self, request: Request):
+        user = User.find(request.param('user'))
+
+        data = ibc.get_account_details(user)
+
+        return data.detail
