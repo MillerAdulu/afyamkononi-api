@@ -73,6 +73,8 @@ class AuthController(Controller):
 
     def view_user(self, request: Request):
         user = User.find(request.param('user'))
+        if user is None:
+            return {'error': 'No such user'}
 
         data = ibc.get_account_details(user)
 
