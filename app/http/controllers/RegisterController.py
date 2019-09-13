@@ -37,8 +37,8 @@ class RegisterController(Controller):
 
         user.save()
 
-        # block_status = ibc.create_account(user)
-        # if 'REJECTED' in block_status[2]:
-        #     return {'error': 'REJECTED'}
+        block_status = ibc.create_account(user)
+        if 'REJECTED' in block_status[2]:
+            return {'error': 'REJECTED'}
 
         return user.to_json()
