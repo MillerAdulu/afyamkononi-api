@@ -7,7 +7,7 @@ from iroha.primitive_pb2 import can_set_my_account_detail
 
 import binascii
 
-IROHA_HOST_ADDR = '127.0.0.1'
+IROHA_HOST_ADDR = '104.197.254.186'
 IROHA_PORT = '50051'
 ADMIN_ACCOUNT_ID = 'admin@test'
 ADMIN_PRIVATE_KEY = 'f101537e319568c765b2cc89698325604991dca57b9716b58016b253506cab70'

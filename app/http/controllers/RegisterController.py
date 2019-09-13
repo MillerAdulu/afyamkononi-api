@@ -35,10 +35,9 @@ class RegisterController(Controller):
         user.private_key = priv_key
         user.public_key = pub_key
 
-        user.save()
-
         block_status = ibc.create_account(user)
         if 'REJECTED' in block_status[2]:
             return {'error': 'REJECTED'}
 
+        user.save()
         return user.to_json()
