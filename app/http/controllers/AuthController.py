@@ -6,7 +6,7 @@ from masonite.controllers import Controller
 from app.User import User
 
 from iroha import IrohaCrypto
-import app.http.controllers.IrohaBlockchain as ibc
+from app.http.controllers.IrohaBlockchain import IrohaBlockchain
 
 import json
 
@@ -21,6 +21,9 @@ class AuthController(Controller):
             request {masonite.request.Request} -- The Masonite Request class.
         """
         self.request = request
+        user = User.find(1)
+        self.ibc = IrohaBlockchain('admin@afyamkononi',
+                                   'f101537e319568c765b2cc89698325604991dca57b9716b58016b253506cab70')
 
     def register(self, request: Request):
         priv_key = IrohaCrypto.private_key()
@@ -75,7 +78,7 @@ class AuthController(Controller):
         user = User.find(request.param('user'))
         if user is None:
             return {'error': 'No such user'}
-
+        ibc = IrohaBlockchain()
         data = ibc.get_account_details(user)
 
         return data.detail
