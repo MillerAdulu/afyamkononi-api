@@ -12,13 +12,9 @@ class IrohaBlockchain:
     IROHA_HOST_ADDR = os.getenv('IROHA_HOST_ADDR', '127.0.0.1')
     IROHA_PORT = os.getenv('IROHA_PORT', '50051')
     
-    def __init__(self, user_account_id, user_private_key):
-        if os.environ.get('https_proxy'):
-            del os.environ['https_proxy']   
-        if os.environ.get('http_proxy'):
-            del os.environ['http_proxy']
-        self.user_account = user_account_id
-        self.ADMIN_PRIVATE_KEY = user_private_key
+    def __init__(self, user_account, user_private_key):
+        self.user_account = user_account
+        self.user_private_key = user_private_key
         self.iroha = Iroha(self.user_account)
         self.net = IrohaGrpc(f'{self.IROHA_HOST_ADDR}:{self.IROHA_PORT}')
 
@@ -29,7 +25,7 @@ class IrohaBlockchain:
         self.net.send_tx(transaction)
         stati = []
 
-        for status in net.tx_status_stream(transaction):
+        for status in self.net.tx_status_stream(transaction):
             stati.append(status)
 
         return stati
@@ -44,7 +40,7 @@ class IrohaBlockchain:
                           domain_id='afyamkononi', public_key=user.public_key)
         ])
 
-        IrohaCrypto.sign_transaction(tx, self.ADMIN_PRIVATE_KEY)
+        IrohaCrypto.sign_transaction(tx, self.user_private_key)
         return self.send_transaction_and_return_status(tx)
 
     def set_account_details(self, user):
@@ -60,7 +56,7 @@ class IrohaBlockchain:
                           value=f'{user.name}'),
         ])
 
-        IrohaCrypto.sign_transaction(tx, self.ADMIN_PRIVATE_KEY)
+        IrohaCrypto.sign_transaction(tx, self.user_private_key)
         return self.send_transaction_and_return_status(tx)
 
     def get_account_details(self, user):
@@ -70,7 +66,7 @@ class IrohaBlockchain:
 
         query = self.iroha.query('GetAccountDetail',
                             account_id=f'{user.name}@afyamkononi')
-        IrohaCrypto.sign_query(query, self.ADMIN_PRIVATE_KEY)
+        IrohaCrypto.sign_query(query, self.user_private_key)
 
         response = self.net.send_query(query)
         return response.account_detail_response

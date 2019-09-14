@@ -21,7 +21,7 @@ class AuthController(Controller):
             request {masonite.request.Request} -- The Masonite Request class.
         """
         self.request = request
-        self.ibc = IrohaBlockchain('admin@afyamkononi',
+        self.ibc = IrohaBlockchain('admin@test',
                                    'f101537e319568c765b2cc89698325604991dca57b9716b58016b253506cab70')
 
     def register(self, request: Request):
@@ -38,7 +38,6 @@ class AuthController(Controller):
         user.public_key = pub_key
 
         block_stati = self.ibc.create_account(user)
-        print(f'1: {block_stati}')
 
         if 'STATEFUL_VALIDATION_FAILED' in block_stati[1]:
             if block_stati[1][2] == 1:
@@ -52,7 +51,6 @@ class AuthController(Controller):
 
         block_stati = self.ibc.grant_admin_set_account_detail_perms(user.name,
                                                                priv_key)
-        print(f'2: {block_stati}')
 
         if 'STATEFUL_VALIDATION_FAILED' in block_stati[1]:
             if block_stati[1][2] == 1:
@@ -63,7 +61,6 @@ class AuthController(Controller):
                 return {'error': 'No such account'}
 
         block_stati = self.ibc.set_account_details(user)
-        print(f'3: {block_stati}')
 
         if 'STATEFUL_VALIDATION_FAILED' in block_stati[1]:
             if block_stati[1][2] == 1:
