@@ -13,6 +13,7 @@ class CreateUsersTable(Migration):
             table.string('private_key')
             table.string('public_key')
             table.string('type')
+            table.string('remember_token').nullable()
             table.timestamp('verified_at').nullable()
             table.timestamps()
 
