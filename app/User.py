@@ -10,3 +10,5 @@ class User(Model):
                     'type']
 
     __auth__ = 'email'
+
+    __hidden__ = ['password', 'public_key', 'private_key']
