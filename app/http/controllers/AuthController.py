@@ -3,6 +3,7 @@
 from masonite.request import Request
 from masonite.view import View
 from masonite.controllers import Controller
+from masonite.auth import Auth
 from app.User import User
 
 from iroha import IrohaCrypto
@@ -24,7 +25,7 @@ class AuthController(Controller):
         self.ibc = IrohaBlockchain('admin@test',
                                    'f101537e319568c765b2cc89698325604991dca57b9716b58016b253506cab70')
 
-    def register(self, request: Request):
+    def register(self, request: Request, auth: Auth):
         priv_key = IrohaCrypto.private_key()
         pub_key = IrohaCrypto.derive_public_key(priv_key)
 
@@ -70,8 +71,19 @@ class AuthController(Controller):
             if block_stati[1][2] == 3:
                 return {'error': 'No such account'}
 
-        user.save()
-        return user.to_json()
+        res = auth.register({
+            "name": user.name,
+            "email": user.email,
+            "password": user.password,
+            "type": user.type,
+            "private_key": user.private_key,
+            "public_key": user.public_key
+        })
+
+        if res is None:
+            return {'success': 'User has been added'}
+
+        return {'error': 'Failed to add user'}
 
     def view_user(self, request: Request):
         user = User.find(request.param('user'))
