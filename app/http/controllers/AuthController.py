@@ -1,6 +1,7 @@
 """An AuthController Module."""
 
 from masonite.request import Request
+from masonite.response import Response
 from masonite.view import View
 from masonite.controllers import Controller
 from masonite.auth import Auth
@@ -25,7 +26,7 @@ class AuthController(Controller):
         self.ibc = IrohaBlockchain('admin@test',
                                    'f101537e319568c765b2cc89698325604991dca57b9716b58016b253506cab70')
 
-    def register(self, request: Request, auth: Auth):
+    def register(self, request: Request, response: Response, auth: Auth):
         priv_key = IrohaCrypto.private_key()
         pub_key = IrohaCrypto.derive_public_key(priv_key)
 
@@ -42,34 +43,34 @@ class AuthController(Controller):
 
         if 'STATEFUL_VALIDATION_FAILED' in block_stati[1]:
             if block_stati[1][2] == 1:
-                return {'error': 'Could not create account'}
+                return response.json({'error': 'Could not create account'})
             if block_stati[1][2] == 2:
-                return {'error': 'No such permissions'}
+                return response.json({'error': 'No such permissions'})
             if block_stati[1][2] == 3:
-                return {'error': 'No such domain'}
+                return response.json({'error': 'No such domain'})
             if block_stati[1][2] == 4:
-                return {'error': 'Account already exists'}
+                return response.json({'error': 'Account already exists'})
 
         block_stati = self.ibc.grant_admin_set_account_detail_perms(user.name,
                                                                priv_key)
 
         if 'STATEFUL_VALIDATION_FAILED' in block_stati[1]:
             if block_stati[1][2] == 1:
-                return {'error': 'Could not grant permission'}
+                return response.json({'error': 'Could not grant permission'})
             if block_stati[1][2] == 2:
-                return {'error': 'No such permissions'}
+                return response.json({'error': 'No such permissions'})
             if block_stati[1][2] == 3:
-                return {'error': 'No such account'}
+                return response.json({'error': 'No such account'})
 
         block_stati = self.ibc.set_account_details(user)
 
         if 'STATEFUL_VALIDATION_FAILED' in block_stati[1]:
             if block_stati[1][2] == 1:
-                return {'error': 'Could not set account detail'}
+                return response.json({'error': 'Could not set account detail'})
             if block_stati[1][2] == 2:
-                return {'error': 'No such permissions'}
+                return response.json({'error': 'No such permissions'})
             if block_stati[1][2] == 3:
-                return {'error': 'No such account'}
+                return response.json({'error': 'No such account'})
 
         res = auth.register({
             "name": user.name,
@@ -81,14 +82,24 @@ class AuthController(Controller):
         })
 
         if res is None:
-            return {'success': 'User has been added'}
+            return response.json({'success': 'User has been added'})
 
-        return {'error': 'Failed to add user'}
+        return response.json({'error': 'Failed to add user'})
 
-    def view_user(self, request: Request):
+    def view_user(self, request: Request, response: Response):
         user = User.find(request.param('user'))
         if user is None:
-            return {'error': 'No such user'}
+            return response.json({'error': 'No such user'})
         data = self.ibc.get_account_details(user)
 
         return data.detail
+
+    def sign_in(self, request: Request, response: Response, auth: Auth):
+        user_auth_res = auth.login(
+            request.input('email'),
+            request.input('password')
+        )
+
+        if user_auth_res is False:
+            return response.json({'error': 'Check your credentials'})
+        return user_auth_res
