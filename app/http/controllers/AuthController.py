@@ -1,5 +1,9 @@
 """An AuthController Module."""
 
+import json
+import os
+import jwt
+
 from masonite.request import Request
 from masonite.response import Response
 from masonite.view import View
@@ -8,9 +12,8 @@ from masonite.auth import Auth
 from app.User import User
 
 from iroha import IrohaCrypto
-from app.http.controllers.IrohaBlockchain import IrohaBlockchain
 
-import json
+from app.http.controllers.IrohaBlockchain import IrohaBlockchain
 
 
 class AuthController(Controller):
@@ -102,4 +105,13 @@ class AuthController(Controller):
 
         if user_auth_res is False:
             return response.json({'error': 'Check your credentials'})
-        return user_auth_res
+        msg = {
+            'id': user_auth_res.id,
+            'email': user_auth_res.email,
+            'name': user_auth_res.name,
+            'type': user_auth_res.type
+        }
+        signing_key = os.getenv('JWT_KEY', '')
+        enc = jwt.encode(msg, signing_key, algorithm='HS256')
+        
+        return response.json({'access_token': enc.decode('utf-8')})
