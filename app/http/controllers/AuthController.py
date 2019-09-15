@@ -154,6 +154,9 @@ class AuthController(Controller):
             try:
                 sg = SendGridAPIClient(env("SENDGRID_KEY"))
                 sg.send(message)
+                print(response.status_code)
+                print(response.body)
+                print(response.headers)
                 return response.json({"success": "Check your email for your credentials"})
             except Exception as e:
                 print(e.message)
