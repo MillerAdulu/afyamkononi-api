@@ -47,7 +47,7 @@ class AuthController(Controller):
         else:
             self.ibc = IrohaBlockchain("0000@afyamkononi", "")
 
-    def register(self, request: Request, response: Response, auth: Auth, view: View):
+    def register(self, request: Request, response: Response, auth: Auth):
 
         if self.access_token is None:
             return response.json({"error": "Unauthorized access"})
@@ -63,21 +63,21 @@ class AuthController(Controller):
         user.phone_number = request.input("phone_number")
         user.private_key = priv_key.decode("utf-8")
         user.public_key = pub_key.decode("utf-8")
-        if user.type is not "admin":
-            user.password = random.randrange(1000, 9999)
+        if user.type == "user":
+            user.password = str(random.randrange(1000, 9999))
         else:
             user.password = request.input("password")
 
         block_stati = self.ibc.create_account(user)
 
         if "STATEFUL_VALIDATION_FAILED" in block_stati[1]:
-            if block_stati[1][2] == 1:
+            if block_stati[1][2] is 1:
                 return response.json({"error": "Could not create account"})
-            if block_stati[1][2] == 2:
+            if block_stati[1][2] is 2:
                 return response.json({"error": "No such permissions"})
-            if block_stati[1][2] == 3:
+            if block_stati[1][2] is 3:
                 return response.json({"error": "No such domain"})
-            if block_stati[1][2] == 4:
+            if block_stati[1][2] is 4:
                 return response.json({"error": "Account already exists"})
 
         block_stati = self.ibc.grant_set_account_detail_perms(
@@ -85,50 +85,50 @@ class AuthController(Controller):
         )
 
         if "STATEFUL_VALIDATION_FAILED" in block_stati[1]:
-            if block_stati[1][2] == 1:
+            if block_stati[1][2] is 1:
                 return response.json({"error": "Could not grant permission"})
-            if block_stati[1][2] == 2:
+            if block_stati[1][2] is 2:
                 return response.json({"error": "No such permissions"})
-            if block_stati[1][2] == 3:
+            if block_stati[1][2] is 3:
                 return response.json({"error": "No such account"})
 
         block_stati = self.ibc.set_account_details(user)
 
         if "STATEFUL_VALIDATION_FAILED" in block_stati[1]:
-            if block_stati[1][2] == 1:
+            if block_stati[1][2] is 1:
                 return response.json({"error": "Could not set account detail"})
-            if block_stati[1][2] == 2:
+            if block_stati[1][2] is 2:
                 return response.json({"error": "No such permissions"})
-            if block_stati[1][2] == 3:
+            if block_stati[1][2] is 3:
                 return response.json({"error": "No such account"})
 
-        if user.type is "user":
+        if user.type != "user":
             block_stati = self.ibc.append_role(user)
 
             if "STATEFUL_VALIDATION_FAILED" in block_stati[1]:
-                if block_stati[1][2] == 1:
+                if block_stati[1][2] is 1:
                     return response.json({"error": "Could not append role"})
-                if block_stati[1][2] == 2:
+                if block_stati[1][2] is 2:
                     return response.json({"error": "No such permissions"})
-                if block_stati[1][2] == 3:
+                if block_stati[1][2] is 3:
                     return response.json({"error": "No such account"})
-                if block_stati[1][2] == 4:
+                if block_stati[1][2] is 4:
                     return response.json({"error": "No such role"})
 
         res = auth.register(
             {
-                "name": request.input("name"),
-                "email": request.input("email"),
+                "name": user.name,
+                "email": user.email,
                 "password": user.password,
-                "type": request.input("type"),
+                "type": user.type,
                 "private_key": user.private_key,
                 "public_key": user.public_key,
-                "gov_id": request.input("gov_id"),
-                "phone_number": request.input("phone_number"),
+                "gov_id": user.gov_id,
+                "phone_number": user.phone_number,
             }
         )
 
-        if res is None:
+        if res is None and user.type == "user":
             message = Mail(
                 from_email=env("MAIL_FROM_ADDRESS", ""),
                 to_emails=user.email,
@@ -138,10 +138,12 @@ class AuthController(Controller):
 
             sg = SendGridAPIClient(env("SENDGRID_KEY"))
             sg.send(message)
+            return response.json({"success": "Check your email for your credentials"})
 
-            return response.json({"success": "User has been added"})
+        elif res is None:
+            return response.json({"success": "Account has been added"})
 
-        return response.json({"error": "Failed to add user"})
+        return response.json({"error": "Failed to add account"})
 
     def view_user(self, request: Request, response: Response):
         if self.access_token is None:
