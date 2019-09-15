@@ -146,20 +146,14 @@ class AuthController(Controller):
 
         if user.type == "user":
             message = Mail(
-                from_email=env("MAIL_FROM_ADDRESS", ""),
+                from_email=env("MAIL_FROM_ADDRESS"),
                 to_emails=user.email,
                 subject="Afya Mkononi Auth Details",
                 html_content=f"<body><div> <p>Welcome to this cool health service</p> <p>Your email: { user.email }</p> <p>Your Password: { user.password }</p</body>",
             )
 
-            print(message.get())
-
             sg = SendGridAPIClient(env("SENDGRID_KEY"))
-            print(user.email)
             response = sg.send(message)
-            print(response.status_code)
-            print(response.body)
-            print(response.headers)
             return response.json({"success": "Check your email for your credentials"})
 
         # elif res is None:
