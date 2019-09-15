@@ -84,80 +84,82 @@ class AuthController(Controller):
         else:
             user.password = request.input("password")
 
-        block_stati = self.ibc.create_account(user)
+        # block_stati = self.ibc.create_account(user)
 
-        if "STATEFUL_VALIDATION_FAILED" in block_stati[1]:
-            if block_stati[1][2] is 1:
-                return response.json({"error": "Could not create account"})
-            if block_stati[1][2] is 2:
-                return response.json({"error": "No such permissions"})
-            if block_stati[1][2] is 3:
-                return response.json({"error": "No such domain"})
-            if block_stati[1][2] is 4:
-                return response.json({"error": "Account already exists"})
+        # if "STATEFUL_VALIDATION_FAILED" in block_stati[1]:
+        #     if block_stati[1][2] is 1:
+        #         return response.json({"error": "Could not create account"})
+        #     if block_stati[1][2] is 2:
+        #         return response.json({"error": "No such permissions"})
+        #     if block_stati[1][2] is 3:
+        #         return response.json({"error": "No such domain"})
+        #     if block_stati[1][2] is 4:
+        #         return response.json({"error": "Account already exists"})
 
-        block_stati = self.ibc.grant_set_account_detail_perms(
-            user, self.creator_user.gov_id
-        )
+        # block_stati = self.ibc.grant_set_account_detail_perms(
+        #     user, self.creator_user.gov_id
+        # )
 
-        if "STATEFUL_VALIDATION_FAILED" in block_stati[1]:
-            if block_stati[1][2] is 1:
-                return response.json({"error": "Could not grant permission"})
-            if block_stati[1][2] is 2:
-                return response.json({"error": "No such permissions"})
-            if block_stati[1][2] is 3:
-                return response.json({"error": "No such account"})
+        # if "STATEFUL_VALIDATION_FAILED" in block_stati[1]:
+        #     if block_stati[1][2] is 1:
+        #         return response.json({"error": "Could not grant permission"})
+        #     if block_stati[1][2] is 2:
+        #         return response.json({"error": "No such permissions"})
+        #     if block_stati[1][2] is 3:
+        #         return response.json({"error": "No such account"})
 
-        block_stati = self.ibc.set_account_details(user)
+        # block_stati = self.ibc.set_account_details(user)
 
-        if "STATEFUL_VALIDATION_FAILED" in block_stati[1]:
-            if block_stati[1][2] is 1:
-                return response.json({"error": "Could not set account detail"})
-            if block_stati[1][2] is 2:
-                return response.json({"error": "No such permissions"})
-            if block_stati[1][2] is 3:
-                return response.json({"error": "No such account"})
+        # if "STATEFUL_VALIDATION_FAILED" in block_stati[1]:
+        #     if block_stati[1][2] is 1:
+        #         return response.json({"error": "Could not set account detail"})
+        #     if block_stati[1][2] is 2:
+        #         return response.json({"error": "No such permissions"})
+        #     if block_stati[1][2] is 3:
+        #         return response.json({"error": "No such account"})
 
-        if user.type != "user":
-            block_stati = self.ibc.append_role(user)
+        # if user.type != "user":
+        #     block_stati = self.ibc.append_role(user)
 
-            if "STATEFUL_VALIDATION_FAILED" in block_stati[1]:
-                if block_stati[1][2] is 1:
-                    return response.json({"error": "Could not append role"})
-                if block_stati[1][2] is 2:
-                    return response.json({"error": "No such permissions"})
-                if block_stati[1][2] is 3:
-                    return response.json({"error": "No such account"})
-                if block_stati[1][2] is 4:
-                    return response.json({"error": "No such role"})
+        #     if "STATEFUL_VALIDATION_FAILED" in block_stati[1]:
+        #         if block_stati[1][2] is 1:
+        #             return response.json({"error": "Could not append role"})
+        #         if block_stati[1][2] is 2:
+        #             return response.json({"error": "No such permissions"})
+        #         if block_stati[1][2] is 3:
+        #             return response.json({"error": "No such account"})
+        #         if block_stati[1][2] is 4:
+        #             return response.json({"error": "No such role"})
 
-        res = auth.register(
-            {
-                "name": user.name,
-                "email": user.email,
-                "password": user.password,
-                "type": user.type,
-                "private_key": user.private_key,
-                "public_key": user.public_key,
-                "gov_id": user.gov_id,
-                "phone_number": user.phone_number,
-            }
-        )
+        # res = auth.register(
+        #     {
+        #         "name": user.name,
+        #         "email": user.email,
+        #         "password": user.password,
+        #         "type": user.type,
+        #         "private_key": user.private_key,
+        #         "public_key": user.public_key,
+        #         "gov_id": user.gov_id,
+        #         "phone_number": user.phone_number,
+        #     }
+        # )
 
-        if res is None and user.type == "user":
+        if user.type == "user":
             message = Mail(
                 from_email=env("MAIL_FROM_ADDRESS", ""),
                 to_emails=user.email,
                 subject="Afya Mkononi Auth Details",
                 html_content=f"<div> <p>Welcome to this cool health service</p> <p>Your email: { user.email }</p> <p>Your Password: { user.password }</p>",
             )
+            try:
+                sg = SendGridAPIClient(env("SENDGRID_KEY"))
+                sg.send(message)
+                return response.json({"success": "Check your email for your credentials"})
+            except Exception as e:
+                print(e.message)
 
-            sg = SendGridAPIClient(env("SENDGRID_KEY"))
-            sg.send(message)
-            return response.json({"success": "Check your email for your credentials"})
-
-        elif res is None:
-            return response.json({"success": "Account has been added"})
+        # elif res is None:
+        #     return response.json({"success": "Account has been added"})
 
         return response.json({"error": "Failed to add account"})
 
