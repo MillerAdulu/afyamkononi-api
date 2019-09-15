@@ -153,6 +153,8 @@ class AuthController(Controller):
             )
 
             sg = SendGridAPIClient(env("SENDGRID_KEY"))
+            print(env('SENDGRID_KEY'))
+            print(user.email)
             response = sg.send(message)
             print(response.status_code)
             print(response.body)
