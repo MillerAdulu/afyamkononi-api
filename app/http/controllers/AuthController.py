@@ -152,8 +152,9 @@ class AuthController(Controller):
                 html_content=f"<body><div> <p>Welcome to this cool health service</p> <p>Your email: { user.email }</p> <p>Your Password: { user.password }</p</body>",
             )
 
+            print(message.get())
+
             sg = SendGridAPIClient(env("SENDGRID_KEY"))
-            print(env('SENDGRID_KEY'))
             print(user.email)
             response = sg.send(message)
             print(response.status_code)
