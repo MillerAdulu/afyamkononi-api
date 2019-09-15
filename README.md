@@ -69,6 +69,16 @@ Adulu Miller Creds
 	"type": "user",
 	"phone_number": "0700000006"
 }
+
+Adulu Strathmore Creds
+{
+	"gov_id": "93983",
+	"name": "Adulu Miller",
+	"email": "adulu.miller@strathmore.edu",
+	"password": "8439",
+	"type": "user",
+	"phone_number": "0700000007"
+}
 ```
 
 ## License Info
