@@ -2,8 +2,9 @@
 
 import json
 import jwt
-import re
 import random
+import re
+import app.http.controllers.utils as utils
 
 from app.User import User
 from app.http.controllers.IrohaBlockchain import IrohaBlockchain
@@ -33,23 +34,24 @@ class AuthController(Controller):
         """
         self.request = request
         self.access_token = request.header("HTTP_AUTHORIZATION")
-        self.signing_key = env("JWT_KEY", "")
-        self.signing_alg = "HS256"
-        if self.access_token is not "":
+
+        if utils.validate_token(self.access_token) is True:
             token = re.sub("Bearer ", "", self.access_token)
-            creator_info = jwt.decode(
-                token, self.signing_key, algorithms=[self.signing_alg]
-            )
-            self.creator_user = User.find(creator_info.get("id"))
-            self.ibc = IrohaBlockchain(
-                f"{self.creator_user.gov_id}@afyamkononi", self.creator_user.private_key
-            )
+            creator_info = utils.decode_token(token)
+            if creator_info != False:
+                self.creator_user = User.find(creator_info.get("id"))
+                self.ibc = IrohaBlockchain(
+                    f"{self.creator_user.gov_id}@afyamkononi",
+                    self.creator_user.private_key,
+                )
+            else:
+                self.ibc = IrohaBlockchain("0000@afyamkononi", "")
         else:
             self.ibc = IrohaBlockchain("0000@afyamkononi", "")
 
     def register(self, request: Request, response: Response, auth: Auth):
 
-        if self.access_token is None:
+        if utils.validate_token(self.access_token) is not True:
             return response.json({"error": "Unauthorized access"})
 
         priv_key = IrohaCrypto.private_key()
@@ -146,7 +148,7 @@ class AuthController(Controller):
         return response.json({"error": "Failed to add account"})
 
     def view_user(self, request: Request, response: Response):
-        if self.access_token is None:
+        if utils.validate_token(self.access_token) is not True:
             return response.json({"error": "Unauthorized access"})
 
         user = User.find(request.param("user"))
@@ -157,8 +159,7 @@ class AuthController(Controller):
         return data.detail
 
     def sign_in(self, request: Request, response: Response, auth: Auth):
-        user_auth_res = auth.login(request.input(
-            "email"), request.input("password"))
+        user_auth_res = auth.login(request.input("email"), request.input("password"))
 
         if user_auth_res is False:
             return response.json({"error": "Check your credentials"})
@@ -169,9 +170,11 @@ class AuthController(Controller):
             "type": user_auth_res.type,
         }
 
-        enc = jwt.encode(msg, self.signing_key, algorithm=self.signing_alg)
+        enc = utils.encode_message(msg)
+        if enc != False:
+            return response.json({"access_token": enc.decode("utf-8")})
 
-        return response.json({"access_token": enc.decode("utf-8")})
+        return response.json({"error": "You cannot access this system at the time"})
 
     def seed_admin(self, request: Request, response: Response, auth: Auth):
         self.ibc.create_init_chain()
@@ -192,3 +195,4 @@ class AuthController(Controller):
             return response.json({"success": "User has been added"})
 
         return response.json({"error": "Failed to add user"})
+
