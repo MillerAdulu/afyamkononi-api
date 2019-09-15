@@ -5,12 +5,12 @@ from iroha import Iroha, IrohaGrpc
 
 from iroha.primitive_pb2 import can_set_my_account_detail
 
-import os
+from masonite import env
 
 
 class IrohaBlockchain:
-    IROHA_HOST_ADDR = os.getenv("IROHA_HOST_ADDR", "127.0.0.1")
-    IROHA_PORT = os.getenv("IROHA_PORT", "50051")
+    IROHA_HOST_ADDR = env("IROHA_HOST_ADDR", "127.0.0.1")
+    IROHA_PORT = env("IROHA_PORT", "50051")
 
     def __init__(self, user_account, user_private_key):
         self.user_account = user_account
