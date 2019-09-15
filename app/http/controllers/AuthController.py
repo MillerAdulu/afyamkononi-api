@@ -159,7 +159,7 @@ class AuthController(Controller):
                 print(response.headers)
                 return response.json({"success": "Check your email for your credentials"})
             except Exception as e:
-                print(e.message)
+                print(e)
 
         # elif res is None:
         #     return response.json({"success": "Account has been added"})
