@@ -17,7 +17,8 @@ Put any configuration settings for your drivers in this configuration setting.
 
 DRIVERS = {
     'async': {
-        'mode': 'threading'
+        'mode': 'multiprocess',
+        "blocking": env('APP_DEBUG')
     },
     'amqp': {
         'username': env('QUEUE_USERNAME', 'guest'),
