@@ -21,7 +21,7 @@ def validate_token(token):
 def decode_token(token):
     try:
         info = jwt.decode(token, signing_key, algorithms=[signing_alg])
-    except Exception as e:
+    except Exception:
         return False
     return info
 
@@ -29,6 +29,6 @@ def decode_token(token):
 def encode_message(message):
     try:
         token = jwt.encode(message, signing_key, algorithm=signing_alg)
-    except Exception as e:
+    except Exception:
         return False
     return token
