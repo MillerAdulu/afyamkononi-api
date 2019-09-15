@@ -21,7 +21,7 @@ from masonite.validation import Validator
 from iroha import IrohaCrypto
 
 from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
+from sendgrid.helpers.mail import *
 
 
 class AuthController(Controller):
@@ -146,10 +146,10 @@ class AuthController(Controller):
 
         if user.type == "user":
             message = Mail(
-                from_email=env("MAIL_FROM_ADDRESS", ""),
-                to_emails=user.email,
+                from_email=Email(env("MAIL_FROM_ADDRESS", "")),
+                to_emails=Email(user.email),
                 subject="Afya Mkononi Auth Details",
-                html_content=f"<div> <p>Welcome to this cool health service</p> <p>Your email: { user.email }</p> <p>Your Password: { user.password }</p>",
+                html_content=f"<body><div> <p>Welcome to this cool health service</p> <p>Your email: { user.email }</p> <p>Your Password: { user.password }</p</body>",
             )
 
             sg = SendGridAPIClient(env("SENDGRID_KEY"))
