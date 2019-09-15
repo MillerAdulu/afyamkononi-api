@@ -4,6 +4,7 @@ import json
 import os
 import jwt
 import re
+import random
 
 from masonite.request import Request
 from masonite.response import Response
@@ -15,6 +16,7 @@ from app.User import User
 from iroha import IrohaCrypto
 
 from app.http.controllers.IrohaBlockchain import IrohaBlockchain
+from masonite import Mail
 
 
 class AuthController(Controller):
@@ -42,7 +44,7 @@ class AuthController(Controller):
         else:
             self.ibc = IrohaBlockchain("0000@afyamkononi", "")
 
-    def register(self, request: Request, response: Response, auth: Auth):
+    def register(self, request: Request, response: Response, auth: Auth, mail: Mail):
 
         if self.access_token is None:
             return response.json({"error": "Unauthorized access"})
@@ -51,15 +53,17 @@ class AuthController(Controller):
         pub_key = IrohaCrypto.derive_public_key(priv_key)
 
         user = User()
-
         user.name = request.input("name")
         user.email = request.input("email")
-        user.password = request.input("password")
         user.type = request.input("type")
         user.gov_id = request.input("gov_id")
         user.phone_number = request.input("phone_number")
         user.private_key = priv_key.decode("utf-8")
         user.public_key = pub_key.decode("utf-8")
+        if user.type is not "admin":
+            user.password = random.randrange(1000, 9999)
+        else:
+            user.password = request.input("password")
 
         block_stati = self.ibc.create_account(user)
 
@@ -112,7 +116,7 @@ class AuthController(Controller):
             {
                 "name": request.input("name"),
                 "email": request.input("email"),
-                "password": request.input("password"),
+                "password": user.password,
                 "type": request.input("type"),
                 "private_key": user.private_key,
                 "public_key": user.public_key,
@@ -122,6 +126,9 @@ class AuthController(Controller):
         )
 
         if res is None:
+            mail.to(user.email).template(
+                "mail/auth_email", {"user": user}
+            ).send()
             return response.json({"success": "User has been added"})
 
         return response.json({"error": "Failed to add user"})
