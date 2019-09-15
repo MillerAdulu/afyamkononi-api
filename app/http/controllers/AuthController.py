@@ -1,7 +1,6 @@
 """An AuthController Module."""
 
 import json
-import os
 import jwt
 import re
 import random
@@ -16,7 +15,9 @@ from app.User import User
 from iroha import IrohaCrypto
 
 from app.http.controllers.IrohaBlockchain import IrohaBlockchain
-from masonite import Mail
+from masonite import env
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 
 class AuthController(Controller):
@@ -30,7 +31,7 @@ class AuthController(Controller):
         """
         self.request = request
         self.access_token = request.header("HTTP_AUTHORIZATION")
-        self.signing_key = os.getenv("JWT_KEY", "")
+        self.signing_key = env("JWT_KEY", "")
         self.signing_alg = "HS256"
         if self.access_token is not "":
             token = re.sub("Bearer ", "", self.access_token)
@@ -44,7 +45,7 @@ class AuthController(Controller):
         else:
             self.ibc = IrohaBlockchain("0000@afyamkononi", "")
 
-    def register(self, request: Request, response: Response, auth: Auth, mail: Mail):
+    def register(self, request: Request, response: Response, auth: Auth, view: View):
 
         if self.access_token is None:
             return response.json({"error": "Unauthorized access"})
@@ -126,9 +127,16 @@ class AuthController(Controller):
         )
 
         if res is None:
-            mail.to(user.email).template(
-                "mail/auth_email", {"user": user}
-            ).send()
+            message = Mail(
+                from_email=env("MAIL_FROM_ADDRESS", ""),
+                to_emails=user.email,
+                subject="Afya Mkononi Auth Details",
+                html_content=f"<div> <p>Welcome to this cool health service</p> <p>Your email: { user.email }</p> <p>Your Password: { user.password }</p>",
+            )
+
+            sg = SendGridAPIClient(env("SENDGRID_KEY"))
+            sg.send(message)
+
             return response.json({"success": "User has been added"})
 
         return response.json({"error": "Failed to add user"})

@@ -6,3 +6,4 @@ masonite-cli==2.2.0
 cleo==0.6.5
 iroha==0.0.5.4
 pyjwt==1.7.1
+sendgrid==6.1.0
