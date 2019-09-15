@@ -79,6 +79,24 @@ Adulu Strathmore Creds
 	"type": "user",
 	"phone_number": "0700000007"
 }
+Adan Creds
+{
+	"gov_id": "97761",
+	"name": "Adan Keith",
+	"email": "adankeith1@gmail.com",
+	"type": "user",
+	"phone_number": "071234567",
+	"password": "5877"
+}
+
+Kenation Creds
+{
+	"gov_id": "123456",
+	"name": "Kenation One",
+	"email": "kenation215@gmail.com",
+	"type": "user",
+	"phone_number": "0712345679"
+}
 ```
 
 ## License Info
