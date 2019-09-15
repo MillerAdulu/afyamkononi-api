@@ -151,15 +151,13 @@ class AuthController(Controller):
                 subject="Afya Mkononi Auth Details",
                 html_content=f"<div> <p>Welcome to this cool health service</p> <p>Your email: { user.email }</p> <p>Your Password: { user.password }</p>",
             )
-            try:
-                sg = SendGridAPIClient(env("SENDGRID_KEY"))
-                sg.send(message)
-                print(response.status_code)
-                print(response.body)
-                print(response.headers)
-                return response.json({"success": "Check your email for your credentials"})
-            except Exception as e:
-                print(e)
+
+            sg = SendGridAPIClient(env("SENDGRID_KEY"))
+            response = sg.send(message)
+            print(response.status_code)
+            print(response.body)
+            print(response.headers)
+            return response.json({"success": "Check your email for your credentials"})
 
         # elif res is None:
         #     return response.json({"success": "Account has been added"})
