@@ -16,6 +16,7 @@ from masonite.response import Response
 from masonite.view import View
 from masonite.controllers import Controller
 from masonite.auth import Auth
+from masonite.validation import Validator
 
 from iroha import IrohaCrypto
 
@@ -49,10 +50,23 @@ class AuthController(Controller):
         else:
             self.ibc = IrohaBlockchain("0000@afyamkononi", "")
 
-    def register(self, request: Request, response: Response, auth: Auth):
+    def register(
+        self, request: Request, response: Response, auth: Auth, validate: Validator
+    ):
 
         if utils.validate_token(self.access_token) is not True:
             return response.json({"error": "Unauthorized access"})
+
+        errors = request.validate(
+            validate.required("name"),
+            validate.required("email"),
+            validate.required("type"),
+            validate.required("gov_id"),
+            validate.required("phone_number"),
+        )
+
+        if errors:
+            return errors
 
         priv_key = IrohaCrypto.private_key()
         pub_key = IrohaCrypto.derive_public_key(priv_key)
@@ -158,7 +172,18 @@ class AuthController(Controller):
 
         return data.detail
 
-    def sign_in(self, request: Request, response: Response, auth: Auth):
+    def sign_in(
+        self, request: Request, response: Response, auth: Auth, validate: Validator
+    ):
+
+        errors = request.validate(
+            validate.required("email"),
+            validate.required("password")
+        )
+
+        if errors:
+            return errors
+
         user_auth_res = auth.login(request.input("email"), request.input("password"))
 
         if user_auth_res is False:
