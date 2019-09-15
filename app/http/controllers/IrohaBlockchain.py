@@ -1,11 +1,11 @@
 """A IrohaBlockchain Module."""
 
+from masonite import env
+
 from iroha import IrohaCrypto
 from iroha import Iroha, IrohaGrpc
 
 from iroha.primitive_pb2 import can_set_my_account_detail
-
-from masonite import env
 
 
 class IrohaBlockchain:
@@ -106,7 +106,8 @@ class IrohaBlockchain:
         Get all the kv-storage entries for a user
         """
 
-        query = self.iroha.query("GetAccountDetail", account_id=f"{gov_id}@afyamkononi")
+        query = self.iroha.query(
+            "GetAccountDetail", account_id=f"{gov_id}@afyamkononi")
         IrohaCrypto.sign_query(query, self.user_private_key)
 
         response = self.net.send_query(query)

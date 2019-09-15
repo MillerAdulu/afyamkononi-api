@@ -5,17 +5,19 @@ import jwt
 import re
 import random
 
+from app.User import User
+from app.http.controllers.IrohaBlockchain import IrohaBlockchain
+
+from masonite import env
+
 from masonite.request import Request
 from masonite.response import Response
 from masonite.view import View
 from masonite.controllers import Controller
 from masonite.auth import Auth
-from app.User import User
 
 from iroha import IrohaCrypto
 
-from app.http.controllers.IrohaBlockchain import IrohaBlockchain
-from masonite import env
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
@@ -153,7 +155,8 @@ class AuthController(Controller):
         return data.detail
 
     def sign_in(self, request: Request, response: Response, auth: Auth):
-        user_auth_res = auth.login(request.input("email"), request.input("password"))
+        user_auth_res = auth.login(request.input(
+            "email"), request.input("password"))
 
         if user_auth_res is False:
             return response.json({"error": "Check your credentials"})
@@ -187,4 +190,3 @@ class AuthController(Controller):
             return response.json({"success": "User has been added"})
 
         return response.json({"error": "Failed to add user"})
-
