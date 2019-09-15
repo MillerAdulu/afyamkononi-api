@@ -153,7 +153,7 @@ class AuthController(Controller):
             )
 
             sg = SendGridAPIClient(env("SENDGRID_KEY"))
-            response = sg.send(message)
+            sg.send(message)
             return response.json({"success": "Check your email for your credentials"})
 
         # elif res is None:
