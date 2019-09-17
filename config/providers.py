@@ -1,7 +1,7 @@
 """Providers Configuration File."""
 
 from masonite.providers import (AppProvider, BroadcastProvider, CacheProvider,
-                                CsrfProvider, HelpersProvider, MailProvider,
+                                CsrfProvider, CorsProvider, HelpersProvider, MailProvider,
                                 QueueProvider, RouteProvider, SassProvider,
                                 SessionProvider, StatusCodeProvider,
                                 UploadProvider, ViewProvider,
@@ -39,4 +39,5 @@ PROVIDERS = [
 
     # Application Providers
 
+    CorsProvider
 ]

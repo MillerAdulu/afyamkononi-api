@@ -21,6 +21,14 @@ HTTP_MIDDLEWARE = [
     MaintenanceModeMiddleware,
 ]
 
+CORS = {
+    'Access-Control-Allow-Origin': "*",
+    "Access-Control-Allow-Methods": "DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT",
+    "Access-Control-Allow-Headers": "Content-Type, Accept, X-Requested-With",
+    "Access-Control-Max-Age": "3600",
+    "Access-Control-Allow-Credentials": "true"
+}
+
 """Route Middleware
 Specify a dictionary of middleware to be used on a per route basis here. The key will
 be the alias to use on routes and the value can be any middleware class or a list
