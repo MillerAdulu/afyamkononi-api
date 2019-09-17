@@ -1,6 +1,6 @@
 """Middleware Configuration Settings."""
 
-from masonite.middleware import ResponseMiddleware, MaintenanceModeMiddleware
+from masonite.middleware import CorsMiddleware, ResponseMiddleware, MaintenanceModeMiddleware
 
 from app.http.middleware.AuthenticationMiddleware import \
     AuthenticationMiddleware
