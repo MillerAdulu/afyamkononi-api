@@ -18,6 +18,7 @@ learn more more about Service Providers in our documentation
 PROVIDERS = [
     # Framework Providers
     AppProvider,
+    CorsProvider,
     SessionProvider,
     RouteProvider,
     StatusCodeProvider,
@@ -39,5 +40,4 @@ PROVIDERS = [
 
     # Application Providers
 
-    CorsProvider
 ]
