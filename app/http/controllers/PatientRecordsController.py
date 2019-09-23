@@ -58,18 +58,6 @@ class PatientRecordsController(Controller):
         if account.detail == "":
             return response.json({"error": "No such account"})
 
-        # user = User.where("gov_id", request.param("patient_id")).first()
-        # block_stati = self.ibc.grant_set_account_detail_perms(user)
-        # print(block_stati)
-
-        # if "STATEFUL_VALIDATION_FAILED" in block_stati[1]:
-        #     if block_stati[1][2] is 1:
-        #         return response.json({"error": "Could not grant permission"})
-        #     if block_stati[1][2] is 2:
-        #         return response.json({"error": "No such permissions"})
-        #     if block_stati[1][2] is 3:
-        #         return response.json({"error": "No such account"})
-
         patient_id = request.param("patient_id")
         patient_data = {
             "symptoms": request.input("symptoms"),
@@ -78,7 +66,6 @@ class PatientRecordsController(Controller):
         }
 
         update_status = self.ibc.set_patient_record(patient_id, patient_data)
-        print(update_status)
 
         if "STATEFUL_VALIDATION_FAILED" in update_status[1]:
             if update_status[1][2] is 1:
