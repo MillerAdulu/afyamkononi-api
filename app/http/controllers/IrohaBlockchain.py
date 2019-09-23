@@ -1,5 +1,9 @@
 """A IrohaBlockchain Module."""
 
+import calendar
+import json
+import time
+
 from masonite import env
 
 from iroha import IrohaCrypto
@@ -106,28 +110,27 @@ class IrohaBlockchain:
         Get all the kv-storage entries for a user
         """
 
-        query = self.iroha.query(
-            "GetAccountDetail", account_id=f"{gov_id}@afyamkononi")
+        query = self.iroha.query("GetAccountDetail", account_id=f"{gov_id}@afyamkononi")
         IrohaCrypto.sign_query(query, self.creator_private_key)
 
         response = self.net.send_query(query)
         return response.account_detail_response
 
-    def grant_set_account_detail_perms(self, user, creator_user_gov_id):
+    def grant_set_account_detail_perms(self, user):
         """
         Make creator account able to set detail to account
         """
-        txa = self.iroha.transaction(
+        tx = self.iroha.transaction(
             [
                 self.iroha.command(
                     "GrantPermission",
-                    account_id=f"{creator_user_gov_id}@afyamkononi",
+                    account_id=self.user_account,
                     permission=can_set_my_account_detail,
                 )
             ],
             creator_account=f"{user.gov_id}@afyamkononi",
         )
-        tx = IrohaCrypto.sign_transaction(txa, user.private_key)
+        IrohaCrypto.sign_transaction(tx, user.private_key)
         return self.send_transaction_and_return_status(tx)
 
     def create_init_chain(self):
@@ -169,4 +172,24 @@ class IrohaBlockchain:
             ]
         )
         tx = IrohaCrypto.sign_transaction(txb, ad)
+        return self.send_transaction_and_return_status(tx)
+
+    def set_patient_record(self, patient_id, patient_data):
+        """
+        Set patient records
+        """
+        timestamp_key = calendar.timegm(time.gmtime())
+        patient_info = json.dumps(patient_data).replace('"', '\\"')
+        txa = self.iroha.transaction(
+            [
+                self.iroha.command(
+                    "SetAccountDetail",
+                    account_id=f"{patient_id}@afyamkononi",
+                    key=f"{timestamp_key}",
+                    value=patient_info,
+                )
+            ]
+        )
+
+        tx = IrohaCrypto.sign_transaction(txa, self.creator_private_key)
         return self.send_transaction_and_return_status(tx)

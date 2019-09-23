@@ -96,9 +96,7 @@ class AuthController(Controller):
             if block_stati[1][2] is 4:
                 return response.json({"error": "Account already exists"})
 
-        block_stati = self.ibc.grant_set_account_detail_perms(
-            user, self.creator_user.gov_id
-        )
+        block_stati = self.ibc.grant_set_account_detail_perms(user)
 
         if "STATEFUL_VALIDATION_FAILED" in block_stati[1]:
             if block_stati[1][2] is 1:

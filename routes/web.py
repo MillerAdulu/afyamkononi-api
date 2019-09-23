@@ -14,7 +14,13 @@ ROUTES = [
                     Patch('/seed_admin', "AuthController@seed_admin")
                 ],
                 prefix="/accounts",
-            )
+            ),
+            RouteGroup(
+                [
+                    Patch('/@patient_id', "PatientRecordsController@store")
+                ],
+                prefix="/patients"
+            ),
         ],
         prefix="/api",
     ),
