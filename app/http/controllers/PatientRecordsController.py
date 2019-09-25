@@ -65,7 +65,7 @@ class PatientRecordsController(Controller):
             "symptoms": request.input("symptoms"),
             "diagnosis": request.input("diagnosis"),
             "treatment_plan": request.input("treatment_plan"),
-            "seen_by": request.input("seen_by")
+            "seen_by": request.input("seen_by"),
         }
 
         patient_account = self.ibc.get_account_details(request.param("patient_id"))
@@ -74,11 +74,7 @@ class PatientRecordsController(Controller):
             return response.json({"error": "No such account"})
 
         unpacked_data = json.loads(patient_account.detail)
-        patient_history = [
-            inner
-            for item in nested_lookup("medical_data", unpacked_data)
-            for inner in ast.literal_eval(item)
-        ]
+        patient_history = self.filter_medical_data(unpacked_data)
 
         history_update = []
         if patient_history == []:
@@ -109,14 +105,12 @@ class PatientRecordsController(Controller):
             return response.json({"error": "Unauthorized access"})
 
         patient_id = request.param("patient_id")
-        patient_medical_history = self.ibc.get_account_details(
-            patient_id, "medical_data"
-        )
-
-        if patient_medical_history.detail == "":
+        blockchain_data = self.ibc.get_account_details(patient_id, "medical_data")
+        if blockchain_data.detail == "":
             return response.json({"error": "No such account"})
+        patient_medical_history = json.loads(blockchain_data.detail)
 
-        return patient_medical_history.detail
+        return self.filter_medical_data(patient_medical_history)
 
     def remove_duplicates(self, duplicate):
         final_list = []
@@ -124,4 +118,11 @@ class PatientRecordsController(Controller):
             if num not in final_list:
                 final_list.append(num)
         return final_list
+
+    def filter_medical_data(self, blockchain_data):
+        return [
+            inner
+            for item in nested_lookup("medical_data", blockchain_data)
+            for inner in ast.literal_eval(item)
+        ]
 
