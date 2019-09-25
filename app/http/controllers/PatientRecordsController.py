@@ -1,9 +1,13 @@
 """A PatientRecordsController Module."""
+import ast
+import calendar
 import json
 import jwt
 import random
 import re
+import time
 import app.http.controllers.utils as utils
+from nested_lookup import nested_lookup
 
 from app.User import User
 
@@ -54,18 +58,34 @@ class PatientRecordsController(Controller):
         if errors:
             return errors
 
-        account = self.ibc.get_account_details(request.param("patient_id"))
-        if account.detail == "":
-            return response.json({"error": "No such account"})
-
         patient_id = request.param("patient_id")
-        patient_data = {
+        patient_record = {
+            "author": f"{self.creator_user.gov_id}@afyamkononi",
+            "timestamp": calendar.timegm(time.gmtime()),
             "symptoms": request.input("symptoms"),
             "diagnosis": request.input("diagnosis"),
             "treatment_plan": request.input("treatment_plan"),
+            "seen_by": request.input("seen_by"),
         }
 
-        update_status = self.ibc.set_patient_record(patient_id, patient_data)
+        patient_account = self.ibc.get_account_details(request.param("patient_id"))
+
+        if patient_account.detail == "":
+            return response.json({"error": "No such account"})
+
+        unpacked_data = json.loads(patient_account.detail)
+        patient_history = self.filter_medical_data(unpacked_data)
+
+        history_update = []
+        if patient_history == []:
+            history_update.append(patient_record)
+        else:
+            history_update += patient_history
+            history_update.append(patient_record)
+
+        history_update = self.remove_duplicates(history_update)
+
+        update_status = self.ibc.set_patient_record(patient_id, history_update)
 
         if "STATEFUL_VALIDATION_FAILED" in update_status[1]:
             if update_status[1][2] is 1:
@@ -76,3 +96,33 @@ class PatientRecordsController(Controller):
                 return response.json({"error": "No such account"})
 
         return response.json({"success": "Medical data added successfully"})
+
+    def show(self, request: Request, response: Response):
+        """
+        Retrieve medical records for a patient
+        """
+        if utils.validate_token(self.access_token) is not True:
+            return response.json({"error": "Unauthorized access"})
+
+        patient_id = request.param("patient_id")
+        blockchain_data = self.ibc.get_account_details(patient_id, "medical_data")
+        if blockchain_data.detail == "":
+            return response.json([])
+        patient_medical_history = json.loads(blockchain_data.detail)
+
+        return self.filter_medical_data(patient_medical_history)
+
+    def remove_duplicates(self, duplicate):
+        final_list = []
+        for num in duplicate:
+            if num not in final_list:
+                final_list.append(num)
+        return final_list
+
+    def filter_medical_data(self, blockchain_data):
+        return [
+            inner
+            for item in nested_lookup("medical_data", blockchain_data)
+            for inner in ast.literal_eval(item)
+        ]
+

@@ -105,12 +105,19 @@ class IrohaBlockchain:
         IrohaCrypto.sign_transaction(tx, self.creator_private_key)
         return self.send_transaction_and_return_status(tx)
 
-    def get_account_details(self, gov_id):
+    def get_account_details(self, gov_id, data_key=None):
         """
         Get all the kv-storage entries for a user
         """
 
-        query = self.iroha.query("GetAccountDetail", account_id=f"{gov_id}@afyamkononi")
+        if data_key == None:
+            query = self.iroha.query(
+                "GetAccountDetail", account_id=f"{gov_id}@afyamkononi"
+            )
+        else:
+            query = self.iroha.query(
+                "GetAccountDetail", account_id=f"{gov_id}@afyamkononi", key=data_key
+            )
         IrohaCrypto.sign_query(query, self.creator_private_key)
 
         response = self.net.send_query(query)
@@ -174,19 +181,18 @@ class IrohaBlockchain:
         tx = IrohaCrypto.sign_transaction(txb, ad)
         return self.send_transaction_and_return_status(tx)
 
-    def set_patient_record(self, patient_id, patient_data):
+    def set_patient_record(self, patient_id, history_update):
         """
         Set patient records
         """
-        timestamp_key = calendar.timegm(time.gmtime())
-        patient_info = json.dumps(patient_data).replace('"', '\\"')
+        history_update = (json.dumps(history_update)).replace('"', '\\"')
         txa = self.iroha.transaction(
             [
                 self.iroha.command(
                     "SetAccountDetail",
                     account_id=f"{patient_id}@afyamkononi",
-                    key=f"{timestamp_key}",
-                    value=patient_info,
+                    key="medical_data",
+                    value=history_update,
                 )
             ]
         )
