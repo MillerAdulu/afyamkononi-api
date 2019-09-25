@@ -16,10 +16,9 @@ class IrohaBlockchain:
     IROHA_HOST_ADDR = env("IROHA_HOST_ADDR", "127.0.0.1")
     IROHA_PORT = env("IROHA_PORT", "50051")
 
-    def __init__(self, user_account, creator_private_key):
-        self.user_account = user_account
-        self.creator_private_key = creator_private_key
-        self.iroha = Iroha(self.user_account)
+    def __init__(self, creator_account_details):
+        self.creator_account_details = creator_account_details
+        self.iroha = Iroha(f'{self.creator_account_details.gov_id}@afyamkononi')
         self.net = IrohaGrpc(f"{self.IROHA_HOST_ADDR}:{self.IROHA_PORT}")
 
     def send_transaction_and_return_status(self, transaction):
@@ -48,7 +47,7 @@ class IrohaBlockchain:
                 )
             ]
         )
-        tx = IrohaCrypto.sign_transaction(txa, self.creator_private_key)
+        tx = IrohaCrypto.sign_transaction(txa, self.creator_account_details.private_key)
         return self.send_transaction_and_return_status(tx)
 
     def append_role(self, user):
@@ -66,7 +65,7 @@ class IrohaBlockchain:
             ]
         )
 
-        tx = IrohaCrypto.sign_transaction(txa, self.creator_private_key)
+        tx = IrohaCrypto.sign_transaction(txa, self.creator_account_details.private_key)
         return self.send_transaction_and_return_status(tx)
 
     def set_account_details(self, user):
@@ -102,7 +101,7 @@ class IrohaBlockchain:
             ]
         )
 
-        IrohaCrypto.sign_transaction(tx, self.creator_private_key)
+        IrohaCrypto.sign_transaction(tx, self.creator_account_details.private_key)
         return self.send_transaction_and_return_status(tx)
 
     def get_account_details(self, gov_id, data_key=None):
@@ -118,7 +117,7 @@ class IrohaBlockchain:
             query = self.iroha.query(
                 "GetAccountDetail", account_id=f"{gov_id}@afyamkononi", key=data_key
             )
-        IrohaCrypto.sign_query(query, self.creator_private_key)
+        IrohaCrypto.sign_query(query, self.creator_account_details.private_key)
 
         response = self.net.send_query(query)
         return response.account_detail_response
@@ -131,7 +130,7 @@ class IrohaBlockchain:
             [
                 self.iroha.command(
                     "GrantPermission",
-                    account_id=self.user_account,
+                    account_id=f"{self.creator_account_details.gov_id}@afyamkononi",
                     permission=can_set_my_account_detail,
                 )
             ],
@@ -197,5 +196,5 @@ class IrohaBlockchain:
             ]
         )
 
-        tx = IrohaCrypto.sign_transaction(txa, self.creator_private_key)
+        tx = IrohaCrypto.sign_transaction(txa, self.creator_account_details.private_key)
         return self.send_transaction_and_return_status(tx)

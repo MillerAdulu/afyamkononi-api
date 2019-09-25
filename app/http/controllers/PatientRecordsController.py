@@ -1,9 +1,6 @@
 """A PatientRecordsController Module."""
 import calendar
 import json
-import jwt
-import random
-import re
 import time
 
 import app.http.controllers.utils as utils
@@ -29,26 +26,10 @@ class PatientRecordsController(Controller):
             request {masonite.request.Request} -- The Masonite Request class.
         """
         self.request = request
-        self.access_token = request.header("HTTP_AUTHORIZATION")
-
-        if utils.validate_token(self.access_token) is True:
-            token = re.sub("Bearer ", "", self.access_token)
-            creator_info = utils.decode_token(token)
-            if creator_info != False:
-                self.creator_user = User.find(creator_info.get("id"))
-                self.ibc = IrohaBlockchain(
-                    f"{self.creator_user.gov_id}@afyamkononi",
-                    self.creator_user.private_key,
-                )
-            else:
-                self.ibc = IrohaBlockchain("0000@afyamkononi", "")
-        else:
-            self.ibc = IrohaBlockchain("0000@afyamkononi", "")
+        self.user = request.user()
+        self.ibc = IrohaBlockchain(self.user)
 
     def store(self, request: Request, response: Response, validate: Validator):
-        if utils.validate_token(self.access_token) is not True:
-            return response.json({"error": "Unauthorized access"})
-
         errors = request.validate(
             validate.required("symptoms"),
             validate.required("diagnosis"),
@@ -60,7 +41,7 @@ class PatientRecordsController(Controller):
 
         patient_id = request.param("patient_id")
         patient_record = {
-            "author": f"{self.creator_user.gov_id}@afyamkononi",
+            "author": f"{self.user.gov_id}@afyamkononi",
             "timestamp": calendar.timegm(time.gmtime()),
             "symptoms": request.input("symptoms"),
             "diagnosis": request.input("diagnosis"),
@@ -96,9 +77,6 @@ class PatientRecordsController(Controller):
         """
         Retrieve medical records for a patient
         """
-        if utils.validate_token(self.access_token) is not True:
-            return response.json({"error": "Unauthorized access"})
-
         patient_id = request.param("patient_id")
         blockchain_data = self.ibc.get_account_details(patient_id, "medical_data")
         if blockchain_data.detail == "":
