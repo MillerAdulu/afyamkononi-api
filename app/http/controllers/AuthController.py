@@ -1,29 +1,12 @@
-"""An AuthController Module."""
-
-import json
-import jwt
-import random
-import re
+"""A AuthController Module."""
 
 import app.http.controllers.utils as utils
-import app.http.controllers.iroha_messages as iroha_messages
-
-from app.User import User
-from app.http.controllers.IrohaBlockchain import IrohaBlockchain
-
-from masonite import env
 
 from masonite.request import Request
 from masonite.response import Response
-from masonite.view import View
 from masonite.controllers import Controller
 from masonite.auth import Auth
 from masonite.validation import Validator
-
-from iroha import IrohaCrypto
-
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
 
 
 class AuthController(Controller):
@@ -36,122 +19,6 @@ class AuthController(Controller):
             request {masonite.request.Request} -- The Masonite Request class.
         """
         self.request = request
-        self.access_token = request.header("HTTP_AUTHORIZATION")
-
-        if utils.validate_token(self.access_token) is True:
-            token = re.sub("Bearer ", "", self.access_token)
-            creator_info = utils.decode_token(token)
-            if creator_info != False:
-                self.creator_user = User.find(creator_info.get("id"))
-                self.ibc = IrohaBlockchain(
-                    f"{self.creator_user.gov_id}@afyamkononi",
-                    self.creator_user.private_key,
-                )
-            else:
-                self.ibc = IrohaBlockchain("0000@afyamkononi", "")
-        else:
-            self.ibc = IrohaBlockchain("0000@afyamkononi", "")
-
-    def register(
-        self, request: Request, response: Response, auth: Auth, validate: Validator
-    ):
-
-        if utils.validate_token(self.access_token) is not True:
-            return response.json({"error": "Unauthorized access"})
-
-        errors = request.validate(
-            validate.required("name"),
-            validate.required("email"),
-            validate.required("type"),
-            validate.required("gov_id"),
-            validate.required("phone_number"),
-        )
-
-        if errors:
-            return errors
-
-        priv_key = IrohaCrypto.private_key()
-        pub_key = IrohaCrypto.derive_public_key(priv_key)
-
-        user = User()
-        user.name = request.input("name")
-        user.email = request.input("email")
-        user.type = request.input("type")
-        user.gov_id = request.input("gov_id")
-        user.phone_number = request.input("phone_number")
-        user.private_key = priv_key.decode("utf-8")
-        user.public_key = pub_key.decode("utf-8")
-        if user.type == "user":
-            user.password = str(random.randrange(1000, 9999))
-        else:
-            user.password = request.input("password")
-
-        blockchain_status = self.ibc.create_account(user)
-        iroha_message = iroha_messages.create_account_failed(blockchain_status)
-        if iroha_message != None:
-            return response.json(iroha_message)
-
-        blockchain_status = self.ibc.grant_set_account_detail_perms(user)
-        iroha_message = iroha_messages.grant_set_account_detail_perms_failed(
-            blockchain_status
-        )
-        if iroha_message != None:
-            return response.json(iroha_message)
-
-        blockchain_status = self.ibc.set_account_details(user)
-        iroha_message = iroha_messages.set_account_details_failed(blockchain_status)
-        if iroha_message != None:
-            return response.json(iroha_message)
-
-        if user.type != "user":
-            blockchain_status = self.ibc.append_role(user)
-            iroha_message = iroha_messages.append_role_failed(blockchain_status)
-            if iroha_message != None:
-                return response.json(iroha_message)
-
-        res = auth.register(
-            {
-                "name": user.name,
-                "email": user.email,
-                "password": user.password,
-                "type": user.type,
-                "private_key": user.private_key,
-                "public_key": user.public_key,
-                "gov_id": user.gov_id,
-                "phone_number": user.phone_number,
-            }
-        )
-
-        if res is None and user.type == "user":
-            message = Mail(
-                from_email=env("MAIL_FROM_ADDRESS"),
-                to_emails=user.email,
-                subject="Afya Mkononi Auth Details",
-                html_content=f"<div> <p>Welcome to this cool health service</p> <p>Your email: { user.email }</p> <p>Your Password: { user.password }</p>",
-            )
-
-            sg = SendGridAPIClient(env("SENDGRID_KEY"))
-            sg.send(message)
-            return response.json({"success": "Check your email for your credentials"})
-
-        elif res is None:
-            return response.json({"success": "Account has been added"})
-
-        return response.json({"error": "Failed to add account"})
-
-    def view_user(self, request: Request, response: Response):
-        if utils.validate_token(self.access_token) is not True:
-            return response.json({"error": "Unauthorized access"})
-
-        user = User.find(request.param("user"))
-        if user is None:
-            return response.json({"error": "No such user"})
-
-        data = self.ibc.get_account_details(user.gov_id)
-        if data == "":
-            return response.json({"error": "No such permissions"})
-
-        return data.detail
 
     def sign_in(
         self, request: Request, response: Response, auth: Auth, validate: Validator
@@ -168,7 +35,7 @@ class AuthController(Controller):
 
         if user_auth_res is False:
             return response.json({"error": "Check your credentials"})
-        
+
         msg = {
             "id": user_auth_res.id,
             "email": user_auth_res.email,
@@ -183,7 +50,7 @@ class AuthController(Controller):
         return response.json({"error": "You cannot access this system at the time"})
 
     def seed_admin(self, request: Request, response: Response, auth: Auth):
-        self.ibc.create_init_chain()
+        # self.ibc.create_init_chain()
         res = auth.register(
             {
                 "name": request.input("name"),
@@ -201,4 +68,3 @@ class AuthController(Controller):
             return response.json({"success": "User has been added"})
 
         return response.json({"error": "Failed to add user"})
-

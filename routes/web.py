@@ -8,19 +8,26 @@ ROUTES = [
         [
             RouteGroup(
                 [
-                    Get("/@user", "AuthController@view_user"),
-                    Post("/", "AuthController@register"),
                     Post("/sign_in", "AuthController@sign_in"),
-                    Patch('/seed_admin', "AuthController@seed_admin")
+                    Patch("/seed_admin", "AuthController@seed_admin"),
                 ],
-                prefix="/accounts",
+                prefix="/auth",
             ),
             RouteGroup(
                 [
-                    Patch('/@patient_id', "PatientRecordsController@store"),
-                    Get("/@patient_id", "PatientRecordsController@show")
+                    Get("/@user", "AccountController@view_user"),
+                    Post("/", "AccountController@register"),
                 ],
-                prefix="/patients"
+                prefix="/accounts",
+                middleware=("auth",),
+            ),
+            RouteGroup(
+                [
+                    Patch("/@patient_id", "PatientRecordsController@store"),
+                    Get("/@patient_id", "PatientRecordsController@show"),
+                ],
+                middleware=("auth",),
+                prefix="/records",
             ),
         ],
         prefix="/api",
