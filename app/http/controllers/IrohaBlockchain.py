@@ -174,19 +174,18 @@ class IrohaBlockchain:
         tx = IrohaCrypto.sign_transaction(txb, ad)
         return self.send_transaction_and_return_status(tx)
 
-    def set_patient_record(self, patient_id, patient_data):
+    def set_patient_record(self, patient_id, history_update):
         """
         Set patient records
         """
-        timestamp_key = calendar.timegm(time.gmtime())
-        patient_info = json.dumps(patient_data).replace('"', '\\"')
+        history_update = (json.dumps(history_update)).replace('"', '\\"')
         txa = self.iroha.transaction(
             [
                 self.iroha.command(
                     "SetAccountDetail",
                     account_id=f"{patient_id}@afyamkononi",
-                    key=f"{timestamp_key}",
-                    value=patient_info,
+                    key="medical_data",
+                    value=history_update,
                 )
             ]
         )
