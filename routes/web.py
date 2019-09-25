@@ -19,15 +19,15 @@ ROUTES = [
                     Post("/", "AccountController@register"),
                 ],
                 prefix="/accounts",
-                middleware=("auth"),
+                middleware=("auth",),
             ),
             RouteGroup(
                 [
                     Patch("/@patient_id", "PatientRecordsController@store"),
                     Get("/@patient_id", "PatientRecordsController@show"),
                 ],
+                middleware=("auth",),
                 prefix="/records",
-                middleware=("auth"),
             ),
         ],
         prefix="/api",
