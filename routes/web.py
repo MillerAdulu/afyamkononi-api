@@ -15,21 +15,19 @@ ROUTES = [
             ),
             RouteGroup(
                 [
-                    Get("/@user", "AccountController@view_user").middleware("auth"),
-                    Post("/", "AccountController@register").middleware("auth"),
+                    Get("/@user", "AccountController@view_user"),
+                    Post("/", "AccountController@register"),
                 ],
                 prefix="/accounts",
+                middleware=("auth"),
             ),
             RouteGroup(
                 [
-                    Patch("/@patient_id", "PatientRecordsController@store").middleware(
-                        "auth"
-                    ),
-                    Get("/@patient_id", "PatientRecordsController@show").middleware(
-                        "auth"
-                    ),
+                    Patch("/@patient_id", "PatientRecordsController@store"),
+                    Get("/@patient_id", "PatientRecordsController@show"),
                 ],
                 prefix="/records",
+                middleware=("auth"),
             ),
         ],
         prefix="/api",
