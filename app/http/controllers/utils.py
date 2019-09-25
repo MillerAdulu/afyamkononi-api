@@ -1,5 +1,9 @@
+import ast
 import re
 import jwt
+
+from nested_lookup import nested_lookup
+
 from masonite import env
 
 signing_key = env("JWT_KEY", "")
@@ -32,3 +36,19 @@ def encode_message(message):
     except Exception:
         return False
     return token
+
+
+def remove_duplicates(duplicate):
+    final_list = []
+    for num in duplicate:
+        if num not in final_list:
+            final_list.append(num)
+    return final_list
+
+
+def filter_medical_data(blockchain_data):
+    return [
+        inner
+        for item in nested_lookup("medical_data", blockchain_data)
+        for inner in ast.literal_eval(item)
+    ]
