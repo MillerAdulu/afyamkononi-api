@@ -60,10 +60,12 @@ class PatientRecordsController(Controller):
 
         patient_id = request.param("patient_id")
         patient_record = {
+            "author": f"{self.creator_user.gov_id}@afyamkononi",
             "timestamp": calendar.timegm(time.gmtime()),
             "symptoms": request.input("symptoms"),
             "diagnosis": request.input("diagnosis"),
             "treatment_plan": request.input("treatment_plan"),
+            "seen_by": request.input("seen_by")
         }
 
         patient_account = self.ibc.get_account_details(request.param("patient_id"))
@@ -72,7 +74,6 @@ class PatientRecordsController(Controller):
             return response.json({"error": "No such account"})
 
         unpacked_data = json.loads(patient_account.detail)
-
         patient_history = [
             inner
             for item in nested_lookup("medical_data", unpacked_data)
@@ -99,6 +100,23 @@ class PatientRecordsController(Controller):
                 return response.json({"error": "No such account"})
 
         return response.json({"success": "Medical data added successfully"})
+
+    def show(self, request: Request, response: Response):
+        """
+        Retrieve medical records for a patient
+        """
+        if utils.validate_token(self.access_token) is not True:
+            return response.json({"error": "Unauthorized access"})
+
+        patient_id = request.param("patient_id")
+        patient_medical_history = self.ibc.get_account_details(
+            patient_id, "medical_data"
+        )
+
+        if patient_medical_history.detail == "":
+            return response.json({"error": "No such account"})
+
+        return patient_medical_history.detail
 
     def remove_duplicates(self, duplicate):
         final_list = []

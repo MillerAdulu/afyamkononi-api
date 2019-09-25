@@ -17,7 +17,8 @@ ROUTES = [
             ),
             RouteGroup(
                 [
-                    Patch('/@patient_id', "PatientRecordsController@store")
+                    Patch('/@patient_id', "PatientRecordsController@store"),
+                    Get("/@patient_id", "PatientRecordsController@show")
                 ],
                 prefix="/patients"
             ),
