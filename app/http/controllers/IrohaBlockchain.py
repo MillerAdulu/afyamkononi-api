@@ -105,12 +105,19 @@ class IrohaBlockchain:
         IrohaCrypto.sign_transaction(tx, self.creator_private_key)
         return self.send_transaction_and_return_status(tx)
 
-    def get_account_details(self, gov_id):
+    def get_account_details(self, gov_id, data_key=None):
         """
         Get all the kv-storage entries for a user
         """
 
-        query = self.iroha.query("GetAccountDetail", account_id=f"{gov_id}@afyamkononi")
+        if data_key == None:
+            query = self.iroha.query(
+                "GetAccountDetail", account_id=f"{gov_id}@afyamkononi"
+            )
+        else:
+            query = self.iroha.query(
+                "GetAccountDetail", account_id=f"{gov_id}@afyamkononi", key=data_key
+            )
         IrohaCrypto.sign_query(query, self.creator_private_key)
 
         response = self.net.send_query(query)
