@@ -1,13 +1,13 @@
 """A PatientRecordsController Module."""
-import ast
 import calendar
 import json
 import jwt
 import random
 import re
 import time
+
 import app.http.controllers.utils as utils
-from nested_lookup import nested_lookup
+import app.http.controllers.iroha_messages as iroha_messages
 
 from app.User import User
 
@@ -74,7 +74,7 @@ class PatientRecordsController(Controller):
             return response.json({"error": "No such account"})
 
         unpacked_data = json.loads(patient_account.detail)
-        patient_history = self.filter_medical_data(unpacked_data)
+        patient_history = utils.filter_medical_data(unpacked_data)
 
         history_update = []
         if patient_history == []:
@@ -83,17 +83,12 @@ class PatientRecordsController(Controller):
             history_update += patient_history
             history_update.append(patient_record)
 
-        history_update = self.remove_duplicates(history_update)
+        history_update = utils.remove_duplicates(history_update)
 
-        update_status = self.ibc.set_patient_record(patient_id, history_update)
-
-        if "STATEFUL_VALIDATION_FAILED" in update_status[1]:
-            if update_status[1][2] is 1:
-                return response.json({"error": "Could not set account detail"})
-            if update_status[1][2] is 2:
-                return response.json({"error": "No such permissions"})
-            if update_status[1][2] is 3:
-                return response.json({"error": "No such account"})
+        blockchain_status = self.ibc.set_patient_record(patient_id, history_update)
+        iroha_message = iroha_messages.update_medical_history_failed(blockchain_status)
+        if iroha_message != None:
+            return response.json(iroha_message)
 
         return response.json({"success": "Medical data added successfully"})
 
@@ -107,22 +102,11 @@ class PatientRecordsController(Controller):
         patient_id = request.param("patient_id")
         blockchain_data = self.ibc.get_account_details(patient_id, "medical_data")
         if blockchain_data.detail == "":
-            return response.json([])
+            return response.json({"data": []})
+
         patient_medical_history = json.loads(blockchain_data.detail)
-
-        return self.filter_medical_data(patient_medical_history)
-
-    def remove_duplicates(self, duplicate):
-        final_list = []
-        for num in duplicate:
-            if num not in final_list:
-                final_list.append(num)
-        return final_list
-
-    def filter_medical_data(self, blockchain_data):
-        return [
-            inner
-            for item in nested_lookup("medical_data", blockchain_data)
-            for inner in ast.literal_eval(item)
-        ]
+        filtered_patient_medical_history = utils.filter_medical_data(
+            patient_medical_history
+        )
+        return response.json({"data": filtered_patient_medical_history})
 

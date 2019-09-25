@@ -4,7 +4,9 @@ import json
 import jwt
 import random
 import re
+
 import app.http.controllers.utils as utils
+import app.http.controllers.iroha_messages as iroha_messages
 
 from app.User import User
 from app.http.controllers.IrohaBlockchain import IrohaBlockchain
@@ -84,50 +86,28 @@ class AuthController(Controller):
         else:
             user.password = request.input("password")
 
-        block_stati = self.ibc.create_account(user)
+        blockchain_status = self.ibc.create_account(user)
+        iroha_message = iroha_messages.create_account_failed(blockchain_status)
+        if iroha_message != None:
+            return response.json(iroha_message)
 
-        if "STATEFUL_VALIDATION_FAILED" in block_stati[1]:
-            if block_stati[1][2] is 1:
-                return response.json({"error": "Could not create account"})
-            if block_stati[1][2] is 2:
-                return response.json({"error": "No such permissions"})
-            if block_stati[1][2] is 3:
-                return response.json({"error": "No such domain"})
-            if block_stati[1][2] is 4:
-                return response.json({"error": "Account already exists"})
+        blockchain_status = self.ibc.grant_set_account_detail_perms(user)
+        iroha_message = iroha_messages.grant_set_account_detail_perms_failed(
+            blockchain_status
+        )
+        if iroha_message != None:
+            return response.json(iroha_message)
 
-        block_stati = self.ibc.grant_set_account_detail_perms(user)
-
-        if "STATEFUL_VALIDATION_FAILED" in block_stati[1]:
-            if block_stati[1][2] is 1:
-                return response.json({"error": "Could not grant permission"})
-            if block_stati[1][2] is 2:
-                return response.json({"error": "No such permissions"})
-            if block_stati[1][2] is 3:
-                return response.json({"error": "No such account"})
-
-        block_stati = self.ibc.set_account_details(user)
-
-        if "STATEFUL_VALIDATION_FAILED" in block_stati[1]:
-            if block_stati[1][2] is 1:
-                return response.json({"error": "Could not set account detail"})
-            if block_stati[1][2] is 2:
-                return response.json({"error": "No such permissions"})
-            if block_stati[1][2] is 3:
-                return response.json({"error": "No such account"})
+        blockchain_status = self.ibc.set_account_details(user)
+        iroha_message = iroha_messages.set_account_details_failed(blockchain_status)
+        if iroha_message != None:
+            return response.json(iroha_message)
 
         if user.type != "user":
-            block_stati = self.ibc.append_role(user)
-
-            if "STATEFUL_VALIDATION_FAILED" in block_stati[1]:
-                if block_stati[1][2] is 1:
-                    return response.json({"error": "Could not append role"})
-                if block_stati[1][2] is 2:
-                    return response.json({"error": "No such permissions"})
-                if block_stati[1][2] is 3:
-                    return response.json({"error": "No such account"})
-                if block_stati[1][2] is 4:
-                    return response.json({"error": "No such role"})
+            blockchain_status = self.ibc.append_role(user)
+            iroha_message = iroha_messages.append_role_failed(blockchain_status)
+            if iroha_message != None:
+                return response.json(iroha_message)
 
         res = auth.register(
             {
@@ -166,7 +146,10 @@ class AuthController(Controller):
         user = User.find(request.param("user"))
         if user is None:
             return response.json({"error": "No such user"})
+
         data = self.ibc.get_account_details(user.gov_id)
+        if data == "":
+            return response.json({"error": "No such permissions"})
 
         return data.detail
 
@@ -185,6 +168,7 @@ class AuthController(Controller):
 
         if user_auth_res is False:
             return response.json({"error": "Check your credentials"})
+        
         msg = {
             "id": user_auth_res.id,
             "email": user_auth_res.email,
