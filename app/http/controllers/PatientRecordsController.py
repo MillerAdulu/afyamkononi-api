@@ -107,7 +107,7 @@ class PatientRecordsController(Controller):
         patient_id = request.param("patient_id")
         blockchain_data = self.ibc.get_account_details(patient_id, "medical_data")
         if blockchain_data.detail == "":
-            return response.json({"error": "No such account"})
+            return response.json([])
         patient_medical_history = json.loads(blockchain_data.detail)
 
         return self.filter_medical_data(patient_medical_history)
