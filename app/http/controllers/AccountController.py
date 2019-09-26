@@ -69,7 +69,6 @@ class AccountController(Controller):
             user.password = request.input("password")
 
         blockchain_status = self.ibc.create_account(user)
-        print(blockchain_status)
         iroha_message = iroha_messages.create_account_failed(blockchain_status)
         if iroha_message != None:
             return response.json(iroha_message)
@@ -122,7 +121,7 @@ class AccountController(Controller):
 
         return response.json({"error": "Failed to add account"})
 
-    def view_user(self, request: Request, response: Response):
+    def user_by_id(self, request: Request, response: Response):
 
         user = User.find(request.param("user"))
         if user is None:
@@ -131,6 +130,16 @@ class AccountController(Controller):
         data = self.ibc.get_account_details(user.gov_id)
         if data == "":
             return response.json({"error": "No such permissions"})
+        return utils.format_query_result(data)
 
-        return data.detail
+    def user_by_gov_id(self, request: Request, response: Response):
+
+        user = User.where("gov_id", request.param("user")).first()
+        if user is None:
+            return response.json({"error": "No such user"})
+        data = self.ibc.get_account_details(user.gov_id)
+        if data == "":
+            return response.json({"error": "No such permissions"})
+
+        return utils.format_query_result(data)
 
