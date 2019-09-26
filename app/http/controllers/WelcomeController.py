@@ -4,7 +4,7 @@ from masonite.view import View
 from masonite.request import Request
 from masonite.controllers import Controller
 
-import app.http.controllers.IrohaBlockchain as ib
+import app.http.modules.IrohaBlockchain as ib
 
 
 class WelcomeController(Controller):
