@@ -3,8 +3,8 @@ import calendar
 import json
 import time
 
-import app.http.controllers.utils as utils
-import app.http.controllers.iroha_messages as iroha_messages
+import app.http.modules.utils as utils
+import app.http.modules.iroha_messages as iroha_messages
 
 from app.User import User
 
@@ -13,7 +13,7 @@ from masonite.response import Response
 from masonite.controllers import Controller
 from masonite.validation import Validator
 
-from app.http.controllers.IrohaBlockchain import IrohaBlockchain
+from app.http.modules.IrohaBlockchain import IrohaBlockchain
 
 
 class PatientRecordsController(Controller):

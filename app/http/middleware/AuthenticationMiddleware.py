@@ -5,8 +5,8 @@ import re
 from masonite.request import Request
 from masonite.response import Response
 
-import app.http.controllers.utils as utils
-from app.http.controllers.IrohaBlockchain import IrohaBlockchain
+import app.http.modules.utils as utils
+from app.http.modules.IrohaBlockchain import IrohaBlockchain
 from app.User import User
 
 

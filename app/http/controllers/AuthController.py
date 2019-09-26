@@ -1,6 +1,6 @@
 """A AuthController Module."""
 
-import app.http.controllers.utils as utils
+import app.http.modules.utils as utils
 
 from masonite.request import Request
 from masonite.response import Response

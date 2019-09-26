@@ -3,11 +3,11 @@
 import json
 import random
 
-import app.http.controllers.utils as utils
-import app.http.controllers.iroha_messages as iroha_messages
+import app.http.modules.utils as utils
+import app.http.modules.iroha_messages as iroha_messages
 
 from app.User import User
-from app.http.controllers.IrohaBlockchain import IrohaBlockchain
+from app.http.modules.IrohaBlockchain import IrohaBlockchain
 
 from masonite import env
 
@@ -36,7 +36,7 @@ class AccountController(Controller):
         self.request = request
         user = request.user()
         self.ibc = IrohaBlockchain(user)
-
+        
     def register(
         self, request: Request, response: Response, auth: Auth, validate: Validator
     ):
