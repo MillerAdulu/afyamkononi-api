@@ -15,7 +15,8 @@ ROUTES = [
             ),
             RouteGroup(
                 [
-                    Get("/@user", "AccountController@view_user"),
+                    Get("/@user", "AccountController@user_by_id"),
+                    Get("/gov_id/@user", "AccountController@user_by_gov_id"),
                     Post("/", "AccountController@register"),
                 ],
                 prefix="/accounts",

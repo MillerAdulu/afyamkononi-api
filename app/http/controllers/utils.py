@@ -1,6 +1,7 @@
 import ast
-import re
+import json
 import jwt
+import re
 
 from nested_lookup import nested_lookup
 
@@ -52,3 +53,27 @@ def filter_medical_data(blockchain_data):
         for item in nested_lookup("medical_data", blockchain_data)
         for inner in ast.literal_eval(item)
     ]
+
+
+def format_query_result(blockchain_data):
+    data = json.loads(blockchain_data.detail)
+    medical_data = filter_medical_data(data)
+
+    data = sum(data.items(), ())
+
+    medical_data = remove_duplicates(medical_data)
+
+    if medical_data == []:
+        return {"creator": data[0], "data": data[1]}
+    else:
+        return {
+            "creator": data[0],
+            "data": {
+                "name": data[1]["name"],
+                "email": data[1]["email"],
+                "gov_id": data[1]["gov_id"],
+                "phone_number": data[1]["phone_number"],
+                "medical_data": medical_data,
+            },
+        }
+

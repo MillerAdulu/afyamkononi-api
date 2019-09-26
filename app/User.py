@@ -19,4 +19,10 @@ class User(Model):
 
     __auth__ = "email"
 
-    __hidden__ = ["password", "public_key", "private_key"]
+    __hidden__ = [
+        "password",
+        "public_key",
+        "private_key",
+        "remember_token",
+        "verified_at",
+    ]

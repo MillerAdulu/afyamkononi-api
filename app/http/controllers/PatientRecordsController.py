@@ -34,7 +34,7 @@ class PatientRecordsController(Controller):
             validate.required("symptoms"),
             validate.required("diagnosis"),
             validate.required("treatment_plan"),
-            validate.required("seen_by")
+            validate.required("seen_by"),
         )
 
         if errors:
