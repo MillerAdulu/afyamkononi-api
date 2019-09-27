@@ -18,7 +18,7 @@ class IrohaBlockchain:
 
     def __init__(self, creator_account_details):
         self.creator_account_details = creator_account_details
-        self.iroha = Iroha(f'{self.creator_account_details.gov_id}@afyamkononi')
+        self.iroha = Iroha(f"{self.creator_account_details.gov_id}@afyamkononi")
         self.net = IrohaGrpc(f"{self.IROHA_HOST_ADDR}:{self.IROHA_PORT}")
 
     def send_transaction_and_return_status(self, transaction):
@@ -198,3 +198,28 @@ class IrohaBlockchain:
 
         tx = IrohaCrypto.sign_transaction(txa, self.creator_account_details.private_key)
         return self.send_transaction_and_return_status(tx)
+
+    def get_all_account_transactions(self, gov_id):
+        querya = self.iroha.query(
+            "GetAccountTransactions", account_id=f"{gov_id}@afyamkononi", page_size=30
+        )
+        query = IrohaCrypto.sign_query(querya, self.creator_account_details.private_key)
+
+        return self.net.send_query(query)
+
+    def get_all_roles(self):
+        querya = self.iroha.query(
+            "GetRoles",
+            creator_account=f"{self.creator_account_details.gov_id}@afyamkononi",
+        )
+
+        query = IrohaCrypto.sign_query(querya, self.creator_account_details.private_key)
+
+        return self.net.send_query(query)
+
+    def get_role_permissions(self, role):
+        querya = self.iroha.query("GetRolePermissions", role_id=role)
+
+        query = IrohaCrypto.sign_query(querya, self.creator_account_details.private_key)
+
+        return self.net.send_query(query)

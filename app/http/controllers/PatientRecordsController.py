@@ -29,6 +29,9 @@ class PatientRecordsController(Controller):
         self.user = request.user()
         self.ibc = IrohaBlockchain(self.user)
 
+    def index(self, response: Response):
+        pass
+
     def store(self, request: Request, response: Response, validate: Validator):
         errors = request.validate(
             validate.required("symptoms"),

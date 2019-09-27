@@ -4,6 +4,7 @@ import jwt
 import re
 
 from nested_lookup import nested_lookup
+from protobuf_to_dict import protobuf_to_dict
 
 from masonite import env
 
@@ -76,4 +77,7 @@ def format_query_result(blockchain_data):
                 "medical_data": medical_data,
             },
         }
+
+    def protobuf_to_dict(proto):
+        return protobuf_to_dict(proto)
 

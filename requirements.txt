@@ -8,3 +8,4 @@ iroha==0.0.5.4
 pyjwt==1.7.1
 sendgrid==6.1.0
 nested_lookup==0.2.18
+protobuf3_to_dict==0.1.5
