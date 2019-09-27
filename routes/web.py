@@ -26,9 +26,19 @@ ROUTES = [
                 [
                     Patch("/@patient_id", "PatientRecordsController@store"),
                     Get("/@patient_id", "PatientRecordsController@show"),
+                    Get("/", "PatientRecordsController@index"),
                 ],
                 middleware=("auth",),
                 prefix="/records",
+            ),
+            RouteGroup(
+                [
+                    Get("/@account_id", "TransactionsController@show"),
+                    Get("/roles", "TransactionsController@all_roles"),
+                    Get("/permissions/@role", "TransactionsController@role_permissions")
+                ],
+                middleware=("auth",),
+                prefix="/transactions",
             ),
         ],
         prefix="/api",
