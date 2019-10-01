@@ -139,45 +139,21 @@ class IrohaBlockchain:
         IrohaCrypto.sign_transaction(tx, user.private_key)
         return self.send_transaction_and_return_status(tx)
 
-    def create_init_chain(self):
-        iroha = Iroha("0000@afyamkononi")
-        ad = "7ce6ab34236eaa4e21ee0acf93b04391091a66acb53332ac1efdb0d9745dd6ae"
-
-        txb = iroha.transaction(
+    def revoke_set_account_detail_perms(self, user):
+        """
+        Make creator account able to set detail to account
+        """
+        tx = self.iroha.transaction(
             [
-                iroha.command(
-                    "SetAccountDetail",
-                    account_id="0000@afyamkononi",
-                    key="gov_id",
-                    value="0000",
-                ),
-                iroha.command(
-                    "SetAccountDetail",
-                    account_id="0000@afyamkononi",
-                    key="name",
-                    value="admin",
-                ),
-                iroha.command(
-                    "SetAccountDetail",
-                    account_id="0000@afyamkononi",
-                    key="email",
-                    value="admin@afyamkononi.com",
-                ),
-                iroha.command(
-                    "SetAccountDetail",
-                    account_id="0000@afyamkononi",
-                    key="type",
-                    value="admin",
-                ),
-                iroha.command(
-                    "SetAccountDetail",
-                    account_id="0000@afyamkononi",
-                    key="phone_number",
-                    value="0700000000",
-                ),
-            ]
+                self.iroha.command(
+                    "RevokePermission",
+                    account_id=f"{self.creator_account_details.gov_id}@afyamkononi",
+                    permission=can_set_my_account_detail,
+                )
+            ],
+            creator_account=f"{user.gov_id}@afyamkononi",
         )
-        tx = IrohaCrypto.sign_transaction(txb, ad)
+        IrohaCrypto.sign_transaction(tx, user.private_key)
         return self.send_transaction_and_return_status(tx)
 
     def set_patient_record(self, patient_id, history_update):
