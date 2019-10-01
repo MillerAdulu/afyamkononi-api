@@ -20,19 +20,19 @@ Super Admin Creds
 	"phone_number": "0700000000"
 }
 
-KMPDU Creds
+KMPDB Creds
 {
 	"gov_id": "0001",
-	"name": "kmpdu",
-	"email": "kmpdu@afyamkononi.com",
-	"password": "superkmpdu",
+	"name": "kmpdb",
+	"email": "kmpdb@afyamkononi.com",
+	"password": "superkmpdb",
 	"type": "registrar",
 	"phone_number": "0700000001"
 }
 
 KNH Creds
 {
-	"gov_id": "0003",
+	"gov_id": "0002",
 	"name": "Kenyatta National Hospital",
 	"email": "knh@afyamkononi.com",
 	"password": "superknh",
@@ -42,12 +42,22 @@ KNH Creds
 
 MTRH Creds
 {
-	"gov_id": "0004",
+	"gov_id": "0003",
 	"name": "Moi Teaching And Referral Hospital",
 	"email": "mtrh@afyamkononi.com",
 	"password": "supermtrh",
 	"type": "healthfacility",
 	"phone_number": "0700000003"
+}
+
+Mbagathi Creds
+{
+	"gov_id": "0004",
+	"name": "Mbagathi Hospital",
+	"email": "mbagathi@afyamkononi.com",
+	"password": "supermbagathi",
+	"type": "healthfacility",
+	"phone_number": "0700000004"
 }
 
 Miller Adulu Creds
