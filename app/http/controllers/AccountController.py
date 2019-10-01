@@ -135,8 +135,9 @@ class AccountController(Controller):
             return response.json({"error": "No such user"})
 
         data = self.ibc.get_account_details(user.gov_id)
-        if data == "":
+        if data.detail == "":
             return response.json({"error": "No such permissions"})
+
         return utils.format_query_result(data)
 
     def user_by_gov_id(self, request: Request, response: Response):
@@ -145,8 +146,7 @@ class AccountController(Controller):
         if user is None:
             return response.json({"error": "No such user"})
         data = self.ibc.get_account_details(user.gov_id)
-        if data == "":
+        if data.detail == "":
             return response.json({"error": "No such permissions"})
 
         return utils.format_query_result(data)
-

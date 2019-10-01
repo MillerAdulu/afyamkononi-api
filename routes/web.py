@@ -6,13 +6,7 @@ ROUTES = [
     Get("/", "WelcomeController@show").name("welcome"),
     RouteGroup(
         [
-            RouteGroup(
-                [
-                    Post("/sign_in", "AuthController@sign_in"),
-                    Patch("/seed_admin", "AuthController@seed_admin"),
-                ],
-                prefix="/auth",
-            ),
+            Post("/auth/sign_in", "AuthController@sign_in"),
             RouteGroup(
                 [
                     Get("/@user", "AccountController@user_by_id"),
@@ -35,7 +29,9 @@ ROUTES = [
                 [
                     Get("/@account_id", "TransactionsController@show"),
                     Get("/roles", "TransactionsController@all_roles"),
-                    Get("/permissions/@role", "TransactionsController@role_permissions")
+                    Get(
+                        "/permissions/@role", "TransactionsController@role_permissions"
+                    ),
                 ],
                 middleware=("auth",),
                 prefix="/transactions",
