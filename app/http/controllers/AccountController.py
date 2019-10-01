@@ -36,7 +36,7 @@ class AccountController(Controller):
         self.request = request
         user = request.user()
         self.ibc = IrohaBlockchain(user)
-        
+
     def register(
         self, request: Request, response: Response, auth: Auth, validate: Validator
     ):
@@ -90,6 +90,13 @@ class AccountController(Controller):
             iroha_message = iroha_messages.append_role_failed(blockchain_status)
             if iroha_message != None:
                 return response.json(iroha_message)
+
+        blockchain_status = self.ibc.revoke_set_account_detail_perms(user)
+        iroha_message = iroha_messages.revoke_set_account_detail_perms_failed(
+            blockchain_status
+        )
+        if iroha_message != None:
+            return response.json(iroha_message)
 
         res = auth.register(
             {
