@@ -65,9 +65,9 @@ Miller Adulu Creds
 	"gov_id": "33989061",
 	"name": "Miller Adulu",
 	"email": "milleradulu@gmail.com",
-	"password": "2457",
+	"password": "4616",
 	"type": "user",
-	"phone_number": "0700000005"
+	"phone_number": "0703175638"
 }
 
 Adulu Miller Creds
@@ -75,37 +75,9 @@ Adulu Miller Creds
 	"gov_id": "33989062",
 	"name": "Adulu Miller",
 	"email": "adulumiller@gmail.com",
-	"password": "6708",
+	"password": "8829",
 	"type": "user",
-	"phone_number": "0700000006"
-}
-
-Adulu Strathmore Creds
-{
-	"gov_id": "93983",
-	"name": "Adulu Miller",
-	"email": "adulu.miller@strathmore.edu",
-	"password": "8439",
-	"type": "user",
-	"phone_number": "0700000007"
-}
-Adan Creds
-{
-	"gov_id": "97761",
-	"name": "Adan Keith",
-	"email": "adankeith1@gmail.com",
-	"type": "user",
-	"phone_number": "071234567",
-	"password": "5877"
-}
-
-Kenation Creds
-{
-	"gov_id": "123456",
-	"name": "Kenation One",
-	"email": "kenation215@gmail.com",
-	"type": "user",
-	"phone_number": "0712345679"
+	"phone_number": "0771515760"
 }
 ```
 

@@ -12,6 +12,7 @@ ROUTES = [
                     Get("/@user", "AccountController@user_by_id"),
                     Get("/gov_id/@user", "AccountController@user_by_gov_id"),
                     Post("/", "AccountController@register"),
+                    Patch("/@gov_id/@user", "AccountController@grant_edit_permissions"),
                 ],
                 prefix="/accounts",
                 middleware=("auth",),

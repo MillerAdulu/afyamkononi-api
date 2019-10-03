@@ -9,7 +9,7 @@ from masonite import env
 from iroha import IrohaCrypto
 from iroha import Iroha, IrohaGrpc
 
-from iroha.primitive_pb2 import can_set_my_account_detail
+from iroha.primitive_pb2 import can_get_my_acc_detail, can_set_my_account_detail
 
 
 class IrohaBlockchain:
@@ -199,3 +199,19 @@ class IrohaBlockchain:
         query = IrohaCrypto.sign_query(querya, self.creator_account_details.private_key)
 
         return self.net.send_query(query)
+
+    def grant_edit_permissions(self, subject):
+        tx = self.iroha.transaction(
+            [
+                self.iroha.command(
+                    "GrantPermission",
+                    account_id=f"{subject.gov_id}@afyamkononi",
+                    permission=can_set_my_account_detail,
+                )
+            ],
+            creator_account=f"{self.creator_account_details.gov_id}@afyamkononi",
+        )
+
+        IrohaCrypto.sign_transaction(tx, self.creator_account_details.private_key)
+        return self.send_transaction_and_return_status(tx)
+
