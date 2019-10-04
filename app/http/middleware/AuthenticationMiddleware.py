@@ -34,7 +34,7 @@ class AuthenticationMiddleware:
                 self.request.set_user(creator_user)
             else:
                 self.response.json({"error": "Unauthorized access"})
-
+                
         if utils.validate_token(access_token) is not True:
             self.response.json({"error": "Unauthorized access"})
 

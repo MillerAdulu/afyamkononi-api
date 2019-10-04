@@ -62,7 +62,8 @@ class IrohaBlockchain:
                     account_id=f"{user.gov_id}@afyamkononi",
                     role_name=user.type,
                 )
-            ]
+            ],
+            creator_account=f"{self.creator_account_details.gov_id}@afyamkononi",
         )
 
         IrohaCrypto.sign_transaction(tx, self.creator_account_details.private_key)
@@ -141,7 +142,7 @@ class IrohaBlockchain:
 
     def revoke_set_account_detail_perms(self, user):
         """
-        Make creator account able to set detail to account
+        Revoke creator account able to set detail to account
         """
         tx = self.iroha.transaction(
             [
@@ -214,4 +215,3 @@ class IrohaBlockchain:
 
         IrohaCrypto.sign_transaction(tx, self.creator_account_details.private_key)
         return self.send_transaction_and_return_status(tx)
-
