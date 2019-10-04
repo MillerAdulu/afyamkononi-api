@@ -36,7 +36,7 @@ class AccountController(Controller):
         self.request = request
         user = request.user()
         self.ibc = IrohaBlockchain(user)
-        
+
     def register(
         self, request: Request, response: Response, auth: Auth, validate: Validator
     ):
@@ -91,6 +91,14 @@ class AccountController(Controller):
             if iroha_message != None:
                 return response.json(iroha_message)
 
+        if user.type == "user":
+            blockchain_status = self.ibc.revoke_set_account_detail_perms(user)
+            iroha_message = iroha_messages.revoke_set_account_detail_perms_failed(
+                blockchain_status
+            )
+            if iroha_message != None:
+                return response.json(iroha_message)
+
         res = auth.register(
             {
                 "name": user.name,
@@ -128,8 +136,13 @@ class AccountController(Controller):
             return response.json({"error": "No such user"})
 
         data = self.ibc.get_account_details(user.gov_id)
-        if data == "":
-            return response.json({"error": "No such permissions"})
+        if data.detail == "":
+            return response.json(
+                {
+                    "error": "No such permissions. This owner has been requested to grant permissions."
+                }
+            )
+
         return utils.format_query_result(data)
 
     def user_by_gov_id(self, request: Request, response: Response):
@@ -138,8 +151,26 @@ class AccountController(Controller):
         if user is None:
             return response.json({"error": "No such user"})
         data = self.ibc.get_account_details(user.gov_id)
-        if data == "":
-            return response.json({"error": "No such permissions"})
+        if data.detail == "":
+            return response.json(
+                {
+                    "error": "No such permissions. This owner has been requested to grant permissions."
+                }
+            )
 
         return utils.format_query_result(data)
+
+    def grant_edit_permissions(self, request: Request, response: Response):
+        subject = User.where("gov_id", request.input("gov_id")).first()
+
+        if subject is None:
+            return response.json({"error": "No such user"})
+        blockchain_status = self.ibc.grant_edit_permissions(subject)
+        iroha_message = iroha_messages.grant_set_account_detail_perms_failed(
+            blockchain_status
+        )
+        if iroha_message != None:
+            return response.json(iroha_message)
+
+        return response.json({"success": "The requested permissions were granted"})
 

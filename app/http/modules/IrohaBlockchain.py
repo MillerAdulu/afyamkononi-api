@@ -9,7 +9,7 @@ from masonite import env
 from iroha import IrohaCrypto
 from iroha import Iroha, IrohaGrpc
 
-from iroha.primitive_pb2 import can_set_my_account_detail
+from iroha.primitive_pb2 import can_get_my_acc_detail, can_set_my_account_detail
 
 
 class IrohaBlockchain:
@@ -37,7 +37,7 @@ class IrohaBlockchain:
         """
         Creates a user account
         """
-        txa = self.iroha.transaction(
+        tx = self.iroha.transaction(
             [
                 self.iroha.command(
                     "CreateAccount",
@@ -47,7 +47,7 @@ class IrohaBlockchain:
                 )
             ]
         )
-        tx = IrohaCrypto.sign_transaction(txa, self.creator_account_details.private_key)
+        IrohaCrypto.sign_transaction(tx, self.creator_account_details.private_key)
         return self.send_transaction_and_return_status(tx)
 
     def append_role(self, user):
@@ -55,17 +55,18 @@ class IrohaBlockchain:
         Appends a role to a user
         """
 
-        txa = self.iroha.transaction(
+        tx = self.iroha.transaction(
             [
                 self.iroha.command(
                     "AppendRole",
                     account_id=f"{user.gov_id}@afyamkononi",
                     role_name=user.type,
                 )
-            ]
+            ],
+            creator_account=f"{self.creator_account_details.gov_id}@afyamkononi",
         )
 
-        tx = IrohaCrypto.sign_transaction(txa, self.creator_account_details.private_key)
+        IrohaCrypto.sign_transaction(tx, self.creator_account_details.private_key)
         return self.send_transaction_and_return_status(tx)
 
     def set_account_details(self, user):
@@ -139,45 +140,21 @@ class IrohaBlockchain:
         IrohaCrypto.sign_transaction(tx, user.private_key)
         return self.send_transaction_and_return_status(tx)
 
-    def create_init_chain(self):
-        iroha = Iroha("0000@afyamkononi")
-        ad = "7ce6ab34236eaa4e21ee0acf93b04391091a66acb53332ac1efdb0d9745dd6ae"
-
-        txb = iroha.transaction(
+    def revoke_set_account_detail_perms(self, user):
+        """
+        Revoke creator account able to set detail to account
+        """
+        tx = self.iroha.transaction(
             [
-                iroha.command(
-                    "SetAccountDetail",
-                    account_id="0000@afyamkononi",
-                    key="gov_id",
-                    value="0000",
-                ),
-                iroha.command(
-                    "SetAccountDetail",
-                    account_id="0000@afyamkononi",
-                    key="name",
-                    value="admin",
-                ),
-                iroha.command(
-                    "SetAccountDetail",
-                    account_id="0000@afyamkononi",
-                    key="email",
-                    value="admin@afyamkononi.com",
-                ),
-                iroha.command(
-                    "SetAccountDetail",
-                    account_id="0000@afyamkononi",
-                    key="type",
-                    value="admin",
-                ),
-                iroha.command(
-                    "SetAccountDetail",
-                    account_id="0000@afyamkononi",
-                    key="phone_number",
-                    value="0700000000",
-                ),
-            ]
+                self.iroha.command(
+                    "RevokePermission",
+                    account_id=f"{self.creator_account_details.gov_id}@afyamkononi",
+                    permission=can_set_my_account_detail,
+                )
+            ],
+            creator_account=f"{user.gov_id}@afyamkononi",
         )
-        tx = IrohaCrypto.sign_transaction(txb, ad)
+        IrohaCrypto.sign_transaction(tx, user.private_key)
         return self.send_transaction_and_return_status(tx)
 
     def set_patient_record(self, patient_id, history_update):
@@ -185,7 +162,7 @@ class IrohaBlockchain:
         Set patient records
         """
         history_update = (json.dumps(history_update)).replace('"', '\\"')
-        txa = self.iroha.transaction(
+        tx = self.iroha.transaction(
             [
                 self.iroha.command(
                     "SetAccountDetail",
@@ -196,30 +173,45 @@ class IrohaBlockchain:
             ]
         )
 
-        tx = IrohaCrypto.sign_transaction(txa, self.creator_account_details.private_key)
+        IrohaCrypto.sign_transaction(tx, self.creator_account_details.private_key)
         return self.send_transaction_and_return_status(tx)
 
     def get_all_account_transactions(self, gov_id):
-        querya = self.iroha.query(
+        query = self.iroha.query(
             "GetAccountTransactions", account_id=f"{gov_id}@afyamkononi", page_size=30
         )
-        query = IrohaCrypto.sign_query(querya, self.creator_account_details.private_key)
+        IrohaCrypto.sign_query(query, self.creator_account_details.private_key)
 
         return self.net.send_query(query)
 
     def get_all_roles(self):
-        querya = self.iroha.query(
+        query = self.iroha.query(
             "GetRoles",
             creator_account=f"{self.creator_account_details.gov_id}@afyamkononi",
         )
 
-        query = IrohaCrypto.sign_query(querya, self.creator_account_details.private_key)
+        query = IrohaCrypto.sign_query(query, self.creator_account_details.private_key)
 
         return self.net.send_query(query)
 
     def get_role_permissions(self, role):
-        querya = self.iroha.query("GetRolePermissions", role_id=role)
+        query = self.iroha.query("GetRolePermissions", role_id=role)
 
-        query = IrohaCrypto.sign_query(querya, self.creator_account_details.private_key)
+        query = IrohaCrypto.sign_query(query, self.creator_account_details.private_key)
 
         return self.net.send_query(query)
+
+    def grant_edit_permissions(self, subject):
+        tx = self.iroha.transaction(
+            [
+                self.iroha.command(
+                    "GrantPermission",
+                    account_id=f"{subject.gov_id}@afyamkononi",
+                    permission=can_set_my_account_detail,
+                )
+            ],
+            creator_account=f"{self.creator_account_details.gov_id}@afyamkononi",
+        )
+
+        IrohaCrypto.sign_transaction(tx, self.creator_account_details.private_key)
+        return self.send_transaction_and_return_status(tx)

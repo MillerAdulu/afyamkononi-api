@@ -48,23 +48,3 @@ class AuthController(Controller):
             return response.json({"access_token": enc.decode("utf-8")})
 
         return response.json({"error": "You cannot access this system at the time"})
-
-    def seed_admin(self, request: Request, response: Response, auth: Auth):
-        # self.ibc.create_init_chain()
-        res = auth.register(
-            {
-                "name": request.input("name"),
-                "email": request.input("email"),
-                "password": request.input("password"),
-                "type": request.input("type"),
-                "private_key": "7ce6ab34236eaa4e21ee0acf93b04391091a66acb53332ac1efdb0d9745dd6ae",
-                "public_key": "06599fc060d23cfb25f88235311e139243b83f3c57bb1e4fc8926eba34a82dbd",
-                "gov_id": request.input("gov_id"),
-                "phone_number": request.input("phone_number"),
-            }
-        )
-
-        if res is None:
-            return response.json({"success": "User has been added"})
-
-        return response.json({"error": "Failed to add user"})

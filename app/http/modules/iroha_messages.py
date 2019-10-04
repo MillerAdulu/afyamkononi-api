@@ -21,6 +21,16 @@ def grant_set_account_detail_perms_failed(blockchain_status):
             return {"error": "No such account"}
     return None
 
+def revoke_set_account_detail_perms_failed(blockchain_status):
+    if "STATEFUL_VALIDATION_FAILED" in blockchain_status[1]:
+        if blockchain_status[1][2] is 1:
+            return {"error": "Could not revoke permission"}
+        if blockchain_status[1][2] is 2:
+            return {"error": "No such permissions"}
+        if blockchain_status[1][2] is 3:
+            return {"error": "No such account"}
+    return None
+
 
 def set_account_details_failed(blockchain_status):
     if "STATEFUL_VALIDATION_FAILED" in blockchain_status[1]:

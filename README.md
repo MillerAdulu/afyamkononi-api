@@ -20,19 +20,19 @@ Super Admin Creds
 	"phone_number": "0700000000"
 }
 
-KMPDU Creds
+KMPDB Creds
 {
 	"gov_id": "0001",
-	"name": "kmpdu",
-	"email": "kmpdu@afyamkononi.com",
-	"password": "superkmpdu",
+	"name": "kmpdb",
+	"email": "kmpdb@afyamkononi.com",
+	"password": "superkmpdb",
 	"type": "registrar",
 	"phone_number": "0700000001"
 }
 
 KNH Creds
 {
-	"gov_id": "0003",
+	"gov_id": "0002",
 	"name": "Kenyatta National Hospital",
 	"email": "knh@afyamkononi.com",
 	"password": "superknh",
@@ -42,7 +42,7 @@ KNH Creds
 
 MTRH Creds
 {
-	"gov_id": "0004",
+	"gov_id": "0003",
 	"name": "Moi Teaching And Referral Hospital",
 	"email": "mtrh@afyamkononi.com",
 	"password": "supermtrh",
@@ -50,14 +50,24 @@ MTRH Creds
 	"phone_number": "0700000003"
 }
 
+Mbagathi Creds
+{
+	"gov_id": "0004",
+	"name": "Mbagathi Hospital",
+	"email": "mbagathi@afyamkononi.com",
+	"password": "supermbagathi",
+	"type": "healthfacility",
+	"phone_number": "0700000004"
+}
+
 Miller Adulu Creds
 {
 	"gov_id": "33989061",
 	"name": "Miller Adulu",
 	"email": "milleradulu@gmail.com",
-	"password": "2457",
+	"password": "2369",
 	"type": "user",
-	"phone_number": "0700000005"
+	"phone_number": "0703175638"
 }
 
 Adulu Miller Creds
@@ -65,37 +75,19 @@ Adulu Miller Creds
 	"gov_id": "33989062",
 	"name": "Adulu Miller",
 	"email": "adulumiller@gmail.com",
-	"password": "6708",
+	"password": "7062",
 	"type": "user",
-	"phone_number": "0700000006"
+	"phone_number": "0771515760"
 }
 
-Adulu Strathmore Creds
+Outlooke
 {
-	"gov_id": "93983",
-	"name": "Adulu Miller",
-	"email": "adulu.miller@strathmore.edu",
-	"password": "8439",
+	"gov_id": "33989063",
+	"name": "Adunje Millaz",
+	"email": "adulumiller@outlook.com",
+	"password": "1135",
 	"type": "user",
-	"phone_number": "0700000007"
-}
-Adan Creds
-{
-	"gov_id": "97761",
-	"name": "Adan Keith",
-	"email": "adankeith1@gmail.com",
-	"type": "user",
-	"phone_number": "071234567",
-	"password": "5877"
-}
-
-Kenation Creds
-{
-	"gov_id": "123456",
-	"name": "Kenation One",
-	"email": "kenation215@gmail.com",
-	"type": "user",
-	"phone_number": "0712345679"
+	"phone_number": "0871515762"
 }
 ```
 
