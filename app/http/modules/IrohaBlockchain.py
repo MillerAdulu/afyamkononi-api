@@ -55,7 +55,7 @@ class IrohaBlockchain:
         Appends a role to a user
         """
 
-        txa = self.iroha.transaction(
+        tx = self.iroha.transaction(
             [
                 self.iroha.command(
                     "AppendRole",
@@ -65,7 +65,7 @@ class IrohaBlockchain:
             ]
         )
 
-        tx = IrohaCrypto.sign_transaction(txa, self.creator_account_details.private_key)
+        IrohaCrypto.sign_transaction(tx, self.creator_account_details.private_key)
         return self.send_transaction_and_return_status(tx)
 
     def set_account_details(self, user):
@@ -161,7 +161,7 @@ class IrohaBlockchain:
         Set patient records
         """
         history_update = (json.dumps(history_update)).replace('"', '\\"')
-        txa = self.iroha.transaction(
+        tx = self.iroha.transaction(
             [
                 self.iroha.command(
                     "SetAccountDetail",
@@ -172,31 +172,31 @@ class IrohaBlockchain:
             ]
         )
 
-        tx = IrohaCrypto.sign_transaction(txa, self.creator_account_details.private_key)
+        IrohaCrypto.sign_transaction(tx, self.creator_account_details.private_key)
         return self.send_transaction_and_return_status(tx)
 
     def get_all_account_transactions(self, gov_id):
-        querya = self.iroha.query(
+        query = self.iroha.query(
             "GetAccountTransactions", account_id=f"{gov_id}@afyamkononi", page_size=30
         )
-        query = IrohaCrypto.sign_query(querya, self.creator_account_details.private_key)
+        IrohaCrypto.sign_query(query, self.creator_account_details.private_key)
 
         return self.net.send_query(query)
 
     def get_all_roles(self):
-        querya = self.iroha.query(
+        query = self.iroha.query(
             "GetRoles",
             creator_account=f"{self.creator_account_details.gov_id}@afyamkononi",
         )
 
-        query = IrohaCrypto.sign_query(querya, self.creator_account_details.private_key)
+        query = IrohaCrypto.sign_query(query, self.creator_account_details.private_key)
 
         return self.net.send_query(query)
 
     def get_role_permissions(self, role):
-        querya = self.iroha.query("GetRolePermissions", role_id=role)
+        query = self.iroha.query("GetRolePermissions", role_id=role)
 
-        query = IrohaCrypto.sign_query(querya, self.creator_account_details.private_key)
+        query = IrohaCrypto.sign_query(query, self.creator_account_details.private_key)
 
         return self.net.send_query(query)
 
