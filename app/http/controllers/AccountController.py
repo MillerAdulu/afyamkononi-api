@@ -69,20 +69,39 @@ class AccountController(Controller):
             user.password = request.input("password")
 
         blockchain_status = self.ibc.create_account(user)
+        print(blockchain_status)
         iroha_message = iroha_messages.create_account_failed(blockchain_status)
         if iroha_message != None:
             return response.json(iroha_message)
 
+        blockchain_status = self.ibc.grant_set_account_detail_perms(user)
+        print(blockchain_status)
+        iroha_message = iroha_messages.grant_set_account_detail_perms_failed(
+            blockchain_status
+        )
+        if iroha_message != None:
+            return response.json(iroha_message)
+
         blockchain_status = self.ibc.set_account_details(user)
+        print(blockchain_status)
         iroha_message = iroha_messages.set_account_details_failed(blockchain_status)
         if iroha_message != None:
             return response.json(iroha_message)
 
         if user.type != "user":
             blockchain_status = self.ibc.append_role(user)
+            print(blockchain_status)
             iroha_message = iroha_messages.append_role_failed(blockchain_status)
             if iroha_message != None:
                 return response.json(iroha_message)
+
+        blockchain_status = self.ibc.revoke_set_account_detail_perms(user)
+        print(blockchain_status)
+        iroha_message = iroha_messages.revoke_set_account_detail_perms_failed(
+            blockchain_status
+        )
+        if iroha_message != None:
+            return response.json(iroha_message)
 
         res = auth.register(
             {
