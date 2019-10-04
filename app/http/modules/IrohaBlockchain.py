@@ -37,7 +37,7 @@ class IrohaBlockchain:
         """
         Creates a user account
         """
-        txa = self.iroha.transaction(
+        tx = self.iroha.transaction(
             [
                 self.iroha.command(
                     "CreateAccount",
@@ -47,7 +47,7 @@ class IrohaBlockchain:
                 )
             ]
         )
-        tx = IrohaCrypto.sign_transaction(txa, self.creator_account_details.private_key)
+        IrohaCrypto.sign_transaction(tx, self.creator_account_details.private_key)
         return self.send_transaction_and_return_status(tx)
 
     def append_role(self, user):
