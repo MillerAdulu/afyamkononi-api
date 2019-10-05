@@ -215,3 +215,18 @@ class IrohaBlockchain:
 
         IrohaCrypto.sign_transaction(tx, self.creator_account_details.private_key)
         return self.send_transaction_and_return_status(tx)
+
+    def revoke_edit_permissions(self, subject):
+        tx = self.iroha.transaction(
+            [
+                self.iroha.command(
+                    "RevokePermission",
+                    account_id=f"{subject.gov_id}@afyamkononi",
+                    permission=can_set_my_account_detail,
+                )
+            ],
+            creator_account=f"{self.creator_account_details.gov_id}@afyamkononi",
+        )
+
+        IrohaCrypto.sign_transaction(tx, self.creator_account_details.private_key)
+        return self.send_transaction_and_return_status(tx)

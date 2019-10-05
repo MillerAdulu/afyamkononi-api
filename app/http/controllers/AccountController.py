@@ -174,3 +174,17 @@ class AccountController(Controller):
 
         return response.json({"success": "The requested permissions were granted"})
 
+    def revoke_edit_permissions(self, request: Request, response: Response):
+        subject = User.where("gov_id", request.input("gov_id")).first()
+
+        if subject is None:
+            return response.json({"error": "No such user"})
+        blockchain_status = self.ibc.revoke_edit_permissions(subject)
+        iroha_message = iroha_messages.revoke_set_account_detail_perms_failed(
+            blockchain_status
+        )
+        if iroha_message != None:
+            return response.json(iroha_message)
+
+        return response.json({"success": "The requested permissions were granted"})
+
