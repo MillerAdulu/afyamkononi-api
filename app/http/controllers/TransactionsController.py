@@ -1,11 +1,15 @@
 """A TransactionsController Module."""
 
+import json
+
 from masonite.request import Request
 from masonite.response import Response
 from masonite.controllers import Controller
 
 from app.http.modules.IrohaBlockchain import IrohaBlockchain
 from app.http.modules.utils import protobuf_to_dict
+
+import app.http.modules.utils as utils
 
 
 class TransactionsController(Controller):
@@ -26,6 +30,10 @@ class TransactionsController(Controller):
 
         blockchain_data = self.ibc.get_all_account_transactions(account_id)
         blockchain_data = protobuf_to_dict(blockchain_data)
+        blockchain_data = utils.format_transaction_data(blockchain_data)
+
+        if blockchain_data is False:
+            return response.json({"error": "No such permissions"})
 
         return response.json({"data": blockchain_data})
 

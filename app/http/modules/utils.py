@@ -78,6 +78,53 @@ def format_query_result(blockchain_data):
             },
         }
 
-    def protobuf_to_dict(proto):
-        return protobuf_to_dict(proto)
 
+def format_transaction_data(blockchain_data):
+    if "error_response" in blockchain_data.keys():
+        return False
+
+    transactions = blockchain_data["transactions_page_response"]["transactions"]
+    transactions = filter_payload(transactions)
+
+    return {
+        "query_hash": blockchain_data["query_hash"],
+        "transactions_page_response": {
+            "all_transactions_size": blockchain_data["transactions_page_response"][
+                "all_transactions_size"
+            ],
+            "transactions": transactions,
+        },
+    }
+
+
+def filter_payload(transaction_payloads):
+    final_commands = []
+    for payload in transaction_payloads:
+        all_commands = filter_commands(payload)
+
+        for tx in all_commands:
+            in_list = sum(tx.items(), ())
+            final_commands.append(
+                {
+                    "action": in_list[0],
+                    "data": in_list[1],
+                    "creator_account_id": payload["payload"]["reduced_payload"][
+                        "creator_account_id"
+                    ],
+                    "created_time": payload["payload"]["reduced_payload"][
+                        "created_time"
+                    ],
+                    "quorum": payload["payload"]["reduced_payload"]["quorum"],
+                    "signatures": payload["signatures"],
+                }
+            )
+
+    return final_commands
+
+
+def filter_commands(transaction_payload):
+    commands = nested_lookup("commands", transaction_payload)
+    all_commands = []
+    for command in commands:
+        all_commands += command
+    return all_commands
