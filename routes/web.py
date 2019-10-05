@@ -38,6 +38,11 @@ ROUTES = [
                 middleware=("auth",),
                 prefix="/transactions",
             ),
+            RouteGroup(
+                [Get("/@gov_id", "ConsentController@show")],
+                prefix="/consent",
+                middleware=("auth",),
+            ),
         ],
         prefix="/api",
     ),
