@@ -40,6 +40,7 @@ class AuthController(Controller):
             "id": user_auth_res.id,
             "email": user_auth_res.email,
             "name": user_auth_res.name,
+            "govId": user_auth_res.gov_id,
             "type": user_auth_res.type,
         }
 
