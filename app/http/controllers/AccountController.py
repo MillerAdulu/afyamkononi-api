@@ -7,6 +7,7 @@ import app.http.modules.utils as utils
 import app.http.modules.iroha_messages as iroha_messages
 
 from app.User import User
+from app.Consent import Consent
 from app.http.modules.IrohaBlockchain import IrohaBlockchain
 
 from masonite import env
@@ -34,8 +35,8 @@ class AccountController(Controller):
             request {masonite.request.Request} -- The Masonite Request class.
         """
         self.request = request
-        user = request.user()
-        self.ibc = IrohaBlockchain(user)
+        self.user = request.user()
+        self.ibc = IrohaBlockchain(self.user)
 
     def register(
         self, request: Request, response: Response, auth: Auth, validate: Validator
@@ -131,11 +132,23 @@ class AccountController(Controller):
 
     def user_by_id(self, request: Request, response: Response):
 
-        user = User.find(request.param("user"))
-        if user is None:
+        subject = User.find(request.param("user"))
+        if subject is None:
             return response.json({"error": "No such user"})
 
-        data = self.ibc.get_account_details(user.gov_id)
+        requestor_id = f"{self.user.gov_id}@afyamkononi"
+        grantor_id = f"{subject.gov_id}@afyamkononi"
+
+        consent = Consent()
+        consent.requestor_id = requestor_id
+        consent.requestor_name = self.user.name
+        consent.grantor_id = grantor_id
+        consent.grantor_name = subject.name
+        consent.permission = "can_set_my_account_detail"
+        consent.first_or_create(grantor_id=grantor_id, requestor_id=requestor_id)
+
+        data = self.ibc.get_account_details(subject.gov_id)
+
         if data.detail == "":
             return response.json(
                 {
@@ -147,10 +160,23 @@ class AccountController(Controller):
 
     def user_by_gov_id(self, request: Request, response: Response):
 
-        user = User.where("gov_id", request.param("user")).first()
-        if user is None:
+        subject = User.where("gov_id", request.param("user")).first()
+        if subject is None:
             return response.json({"error": "No such user"})
-        data = self.ibc.get_account_details(user.gov_id)
+
+        requestor_id = f"{self.user.gov_id}@afyamkononi"
+        grantor_id = f"{subject.gov_id}@afyamkononi"
+
+        consent = Consent()
+        consent.requestor_id = requestor_id
+        consent.requestor_name = self.user.name
+        consent.grantor_id = grantor_id
+        consent.grantor_name = subject.name
+        consent.permission = "can_set_my_account_detail"
+        consent.first_or_create(grantor_id=grantor_id, requestor_id=requestor_id)
+
+        data = self.ibc.get_account_details(subject.gov_id)
+
         if data.detail == "":
             return response.json(
                 {
@@ -172,6 +198,12 @@ class AccountController(Controller):
         if iroha_message != None:
             return response.json(iroha_message)
 
+        (
+            Consent.where("requestor_id", f"{subject.gov_id}@afyamkononi")
+            .where("grantor_id", f"{self.user.gov_id}@afyamkononi")
+            .update(status="granted")
+        )
+
         return response.json({"success": "The requested permissions were granted"})
 
     def revoke_edit_permissions(self, request: Request, response: Response):
@@ -186,5 +218,11 @@ class AccountController(Controller):
         if iroha_message != None:
             return response.json(iroha_message)
 
-        return response.json({"success": "The requested permissions were granted"})
+        (
+            Consent.where("requestor_id", f"{subject.gov_id}@afyamkononi")
+            .where("grantor_id", f"{self.user.gov_id}@afyamkononi")
+            .update(status="revoked")
+        )
+
+        return response.json({"success": "The requested permissions were revoked"})
 
