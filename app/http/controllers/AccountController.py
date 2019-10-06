@@ -139,13 +139,23 @@ class AccountController(Controller):
         requestor_id = f"{self.user.gov_id}@afyamkononi"
         grantor_id = f"{subject.gov_id}@afyamkononi"
 
+        consent_confirm = (
+            Consent.where("requestor_id", requestor_id)
+            .where("grantor_id", grantor_id)
+            .first()
+        )
+
         consent = Consent()
         consent.requestor_id = requestor_id
         consent.requestor_name = self.user.name
         consent.grantor_id = grantor_id
         consent.grantor_name = subject.name
         consent.permission = "can_set_my_account_detail"
-        consent.first_or_create(grantor_id=grantor_id, requestor_id=requestor_id)
+
+        if consent_confirm == None:
+            consent.save()
+        else:
+            consent.update(status="pending")
 
         data = self.ibc.get_account_details(subject.gov_id)
 
@@ -167,13 +177,23 @@ class AccountController(Controller):
         requestor_id = f"{self.user.gov_id}@afyamkononi"
         grantor_id = f"{subject.gov_id}@afyamkononi"
 
+        consent_confirm = (
+            Consent.where("requestor_id", requestor_id)
+            .where("grantor_id", grantor_id)
+            .first()
+        )
+
         consent = Consent()
         consent.requestor_id = requestor_id
         consent.requestor_name = self.user.name
         consent.grantor_id = grantor_id
         consent.grantor_name = subject.name
         consent.permission = "can_set_my_account_detail"
-        consent.first_or_create(grantor_id=grantor_id, requestor_id=requestor_id)
+
+        if consent_confirm == None:
+            consent.save()
+        else:
+            consent.update(status="pending")
 
         data = self.ibc.get_account_details(subject.gov_id)
 
