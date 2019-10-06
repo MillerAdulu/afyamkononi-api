@@ -65,7 +65,7 @@ Miller Adulu Creds
 	"gov_id": "33989061",
 	"name": "Miller Adulu",
 	"email": "milleradulu@gmail.com",
-	"password": "2369",
+	"password": "7211",
 	"type": "user",
 	"phone_number": "0703175638"
 }
@@ -75,7 +75,7 @@ Adulu Miller Creds
 	"gov_id": "33989062",
 	"name": "Adulu Miller",
 	"email": "adulumiller@gmail.com",
-	"password": "7062",
+	"password": "8814",
 	"type": "user",
 	"phone_number": "0771515760"
 }
