@@ -7,6 +7,7 @@ import app.http.modules.utils as utils
 import app.http.modules.iroha_messages as iroha_messages
 
 from app.User import User
+from app.Consent import Consent
 
 from masonite.request import Request
 from masonite.response import Response
@@ -72,7 +73,7 @@ class PatientRecordsController(Controller):
 
         blockchain_status = self.ibc.set_patient_record(patient_id, history_update)
         iroha_message = iroha_messages.update_medical_history_failed(blockchain_status)
-        if iroha_message != None:
+        if iroha_message is not None:
             return response.json(iroha_message)
 
         return response.json({"success": "Medical data added successfully"})
@@ -81,8 +82,48 @@ class PatientRecordsController(Controller):
         """
         Retrieve medical records for a patient
         """
-        patient_id = request.param("patient_id")
-        blockchain_data = self.ibc.get_account_details(patient_id, "medical_data")
+
+        subject = User.where("gov_id", request.param("patient_id")).first()
+        if subject is None:
+            return response.json({"error": "No such user"})
+
+        requestor_id = f"{self.user.gov_id}@afyamkononi"
+        grantor_id = f"{subject.gov_id}@afyamkononi"
+
+        consent_confirm = (
+            Consent.where("requestor_id", requestor_id)
+            .where("grantor_id", grantor_id)
+            .where("grantor_id", "!=", requestor_id)
+            .first()
+        )
+
+        consent = Consent()
+
+        if consent_confirm is None and requestor_id != grantor_id:
+            consent.requestor_id = requestor_id
+            consent.requestor_name = self.user.name
+            consent.grantor_id = grantor_id
+            consent.grantor_name = subject.name
+            consent.permission = "can_set_my_account_detail"
+            consent.save()
+            return response.json(
+                {
+                    "error": "No such permissions. This owner has been requested to grant permissions."
+                }
+            )
+        elif (
+            consent_confirm is not None
+            and consent_confirm.grantor_id != requestor_id
+            and consent_confirm.status != "granted"
+        ):
+            consent.update(status="pending")
+            return response.json(
+                {
+                    "error": "No such permissions. This owner has been requested to grant permissions."
+                }
+            )
+
+        blockchain_data = self.ibc.get_account_details(subject.gov_id, "medical_data")
         if blockchain_data.detail == "":
             return response.json({"data": []})
 
@@ -91,4 +132,3 @@ class PatientRecordsController(Controller):
             patient_medical_history
         )
         return response.json({"data": filtered_patient_medical_history})
-

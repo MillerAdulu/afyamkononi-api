@@ -1,6 +1,5 @@
 """An AccountController Module."""
 
-import json
 import random
 
 import app.http.modules.utils as utils
@@ -142,20 +141,35 @@ class AccountController(Controller):
         consent_confirm = (
             Consent.where("requestor_id", requestor_id)
             .where("grantor_id", grantor_id)
+            .where("grantor_id", "!=", requestor_id)
             .first()
         )
 
         consent = Consent()
-        consent.requestor_id = requestor_id
-        consent.requestor_name = self.user.name
-        consent.grantor_id = grantor_id
-        consent.grantor_name = subject.name
-        consent.permission = "can_set_my_account_detail"
 
-        if consent_confirm == None:
+        if consent_confirm is None and requestor_id != grantor_id:
+            consent.requestor_id = requestor_id
+            consent.requestor_name = self.user.name
+            consent.grantor_id = grantor_id
+            consent.grantor_name = subject.name
+            consent.permission = "can_set_my_account_detail"
             consent.save()
-        else:
+            return response.json(
+                {
+                    "error": "No such permissions. This owner has been requested to grant permissions."
+                }
+            )
+        elif (
+            consent_confirm is not None
+            and consent_confirm.grantor_id != requestor_id
+            and consent_confirm.status != "granted"
+        ):
             consent.update(status="pending")
+            return response.json(
+                {
+                    "error": "No such permissions. This owner has been requested to grant permissions."
+                }
+            )
 
         data = self.ibc.get_account_details(subject.gov_id)
 
@@ -180,20 +194,35 @@ class AccountController(Controller):
         consent_confirm = (
             Consent.where("requestor_id", requestor_id)
             .where("grantor_id", grantor_id)
+            .where("grantor_id", "!=", requestor_id)
             .first()
         )
 
         consent = Consent()
-        consent.requestor_id = requestor_id
-        consent.requestor_name = self.user.name
-        consent.grantor_id = grantor_id
-        consent.grantor_name = subject.name
-        consent.permission = "can_set_my_account_detail"
 
-        if consent_confirm == None:
+        if consent_confirm is None and requestor_id != grantor_id:
+            consent.requestor_id = requestor_id
+            consent.requestor_name = self.user.name
+            consent.grantor_id = grantor_id
+            consent.grantor_name = subject.name
+            consent.permission = "can_set_my_account_detail"
             consent.save()
-        else:
+            return response.json(
+                {
+                    "error": "No such permissions. This owner has been requested to grant permissions."
+                }
+            )
+        elif (
+            consent_confirm is not None
+            and consent_confirm.grantor_id != requestor_id
+            and consent_confirm.status != "granted"
+        ):
             consent.update(status="pending")
+            return response.json(
+                {
+                    "error": "No such permissions. This owner has been requested to grant permissions."
+                }
+            )
 
         data = self.ibc.get_account_details(subject.gov_id)
 
@@ -215,7 +244,7 @@ class AccountController(Controller):
         iroha_message = iroha_messages.grant_set_account_detail_perms_failed(
             blockchain_status
         )
-        if iroha_message != None:
+        if iroha_message is not None:
             return response.json(iroha_message)
 
         (
@@ -235,7 +264,7 @@ class AccountController(Controller):
         iroha_message = iroha_messages.revoke_set_account_detail_perms_failed(
             blockchain_status
         )
-        if iroha_message != None:
+        if iroha_message is not None:
             return response.json(iroha_message)
 
         (
@@ -245,4 +274,3 @@ class AccountController(Controller):
         )
 
         return response.json({"success": "The requested permissions were revoked"})
-
