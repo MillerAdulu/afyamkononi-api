@@ -144,9 +144,8 @@ class AccountController(Controller):
             .first()
         )
 
-        consent = Consent()
-
         if consent_confirm is None and requestor_id != grantor_id:
+            consent = Consent()
             consent.requestor_id = requestor_id
             consent.requestor_name = self.user.name
             consent.grantor_id = grantor_id
@@ -163,7 +162,7 @@ class AccountController(Controller):
             and consent_confirm.grantor_id != requestor_id
             and consent_confirm.status != "granted"
         ):
-            consent.update(status="pending")
+            consent_confirm.update(status="pending")
             return response.json(
                 {
                     "error": "No such permissions. This owner has been requested to grant permissions."
@@ -196,9 +195,8 @@ class AccountController(Controller):
             .first()
         )
 
-        consent = Consent()
-
         if consent_confirm is None and requestor_id != grantor_id:
+            consent = Consent()
             consent.requestor_id = requestor_id
             consent.requestor_name = self.user.name
             consent.grantor_id = grantor_id
@@ -215,7 +213,7 @@ class AccountController(Controller):
             and consent_confirm.grantor_id != requestor_id
             and consent_confirm.status != "granted"
         ):
-            consent.update(status="pending")
+            consent_confirm.update(status="pending")
             return response.json(
                 {
                     "error": "No such permissions. This owner has been requested to grant permissions."
