@@ -141,7 +141,6 @@ class AccountController(Controller):
         consent_confirm = (
             Consent.where("requestor_id", requestor_id)
             .where("grantor_id", grantor_id)
-            .where("grantor_id", "!=", requestor_id)
             .first()
         )
 
@@ -194,7 +193,6 @@ class AccountController(Controller):
         consent_confirm = (
             Consent.where("requestor_id", requestor_id)
             .where("grantor_id", grantor_id)
-            .where("grantor_id", "!=", requestor_id)
             .first()
         )
 
@@ -237,6 +235,7 @@ class AccountController(Controller):
 
     def grant_edit_permissions(self, request: Request, response: Response):
         subject = User.where("gov_id", request.input("gov_id")).first()
+        grantor = User.where("gov_id", request.param("user")).first()
 
         if subject is None:
             return response.json({"error": "No such user"})
@@ -249,7 +248,7 @@ class AccountController(Controller):
 
         (
             Consent.where("requestor_id", f"{subject.gov_id}@afyamkononi")
-            .where("grantor_id", f"{self.user.gov_id}@afyamkononi")
+            .where("grantor_id", f"{grantor.gov_id}@afyamkononi")
             .update(status="granted")
         )
 
@@ -257,6 +256,7 @@ class AccountController(Controller):
 
     def revoke_edit_permissions(self, request: Request, response: Response):
         subject = User.where("gov_id", request.input("gov_id")).first()
+        grantor = User.where("gov_id", request.param("user")).first()
 
         if subject is None:
             return response.json({"error": "No such user"})
@@ -269,7 +269,7 @@ class AccountController(Controller):
 
         (
             Consent.where("requestor_id", f"{subject.gov_id}@afyamkononi")
-            .where("grantor_id", f"{self.user.gov_id}@afyamkononi")
+            .where("grantor_id", f"{grantor.gov_id}@afyamkononi")
             .update(status="revoked")
         )
 
