@@ -157,7 +157,7 @@ class IrohaBlockchain:
         IrohaCrypto.sign_transaction(tx, user.private_key)
         return self.send_transaction_and_return_status(tx)
 
-    def set_patient_record(self, patient_id, history_update):
+    def set_patient_record(self, patient, history_update):
         """
         Set patient records
         """
@@ -166,7 +166,32 @@ class IrohaBlockchain:
             [
                 self.iroha.command(
                     "SetAccountDetail",
-                    account_id=f"{patient_id}@afyamkononi",
+                    account_id=f"{patient.gov_id}@afyamkononi",
+                    key="gov_id",
+                    value=f"{patient.gov_id}",
+                ),
+                self.iroha.command(
+                    "SetAccountDetail",
+                    account_id=f"{patient.gov_id}@afyamkononi",
+                    key="name",
+                    value=f"{patient.name}",
+                ),
+                self.iroha.command(
+                    "SetAccountDetail",
+                    account_id=f"{patient.gov_id}@afyamkononi",
+                    key="email",
+                    value=f"{patient.email}",
+                ),
+                self.iroha.command(
+                    "SetAccountDetail",
+                    account_id=f"{patient.gov_id}@afyamkononi",
+                    key="phone_number",
+                    value=f"{patient.phone_number}",
+                ),
+
+                self.iroha.command(
+                    "SetAccountDetail",
+                    account_id=f"{patient.gov_id}@afyamkononi",
                     key="medical_data",
                     value=history_update,
                 )

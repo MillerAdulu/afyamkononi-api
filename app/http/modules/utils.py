@@ -64,6 +64,8 @@ def format_query_result(blockchain_data):
 
     medical_data = remove_duplicates(medical_data)
 
+    print(data[1])
+
     if medical_data == []:
         return {"creator": data[0], "data": data[1]}
     else:

@@ -71,7 +71,10 @@ class PatientRecordsController(Controller):
 
         history_update = utils.remove_duplicates(history_update)
 
-        blockchain_status = self.ibc.set_patient_record(patient_id, history_update)
+        blockchain_status = self.ibc.set_patient_record(
+            User.where("gov_id", patient_id).first(), history_update
+        )
+        print(blockchain_status)
         iroha_message = iroha_messages.update_medical_history_failed(blockchain_status)
         if iroha_message is not None:
             return response.json(iroha_message)
