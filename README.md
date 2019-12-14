@@ -60,36 +60,7 @@ Mbagathi Creds
 	"phone_number": "0700000004"
 }
 
-Miller Adulu Creds
-{
-	"gov_id": "33989061",
-	"name": "Miller Adulu",
-	"email": "milleradulu@gmail.com",
-	"password": "7211",
-	"type": "user",
-	"phone_number": "0703175638"
-}
 
-Adulu Miller Creds
-{
-	"gov_id": "33989062",
-	"name": "Adulu Miller",
-	"email": "adulumiller@gmail.com",
-	"password": "8814",
-	"type": "user",
-	"phone_number": "0771515760"
-}
 
-Outlooke
-{
-	"gov_id": "33989063",
-	"name": "Adunje Millaz",
-	"email": "adulumiller@outlook.com",
-	"password": "1135",
-	"type": "user",
-	"phone_number": "0871515762"
-}
-```
-
-## License Info
-This project is protected by law under Strathmore University.
+# License
+Protected by Strathmore University
